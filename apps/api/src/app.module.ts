@@ -45,30 +45,44 @@ import {
     // PostgreSQL via TypeORM
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DATABASE_HOST', 'localhost'),
-        port: configService.get<number>('DATABASE_PORT', 5432),
-        username: configService.get('DATABASE_USER', 'antigaspi'),
-        password: configService.get('DATABASE_PASSWORD', 'antigaspi_dev_2024'),
-        database: configService.get('DATABASE_NAME', 'antigaspi'),
-        entities: [
-          User,
-          Offer,
-          Reservation,
-          Donation,
-          Message,
-          Report,
-          InstitutionalDonation,
-          TransferDeed,
-          SponsorCampaign,
-          PricingConfig,
-          AuditLog,
-          OtpCode,
-        ],
-        synchronize: true, // Dev only — use migrations in production
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const url = configService.get('DATABASE_URL');
+        const isProd = configService.get('NODE_ENV') === 'production';
+        return {
+          type: 'postgres',
+          ...(url
+            ? {
+                url,
+                ssl: isProd ? { rejectUnauthorized: false } : false,
+              }
+            : {
+                host: configService.get<string>('DATABASE_HOST', 'localhost'),
+                port: configService.get<number>('DATABASE_PORT', 5432),
+                username: configService.get<string>('DATABASE_USER', 'antigaspi'),
+                password: configService.get<string>(
+                  'DATABASE_PASSWORD',
+                  'antigaspi_dev_2024',
+                ),
+                database: configService.get<string>('DATABASE_NAME', 'antigaspi'),
+              }),
+          entities: [
+            User,
+            Offer,
+            Reservation,
+            Donation,
+            Message,
+            Report,
+            InstitutionalDonation,
+            TransferDeed,
+            SponsorCampaign,
+            PricingConfig,
+            AuditLog,
+            OtpCode,
+          ],
+          synchronize: true, // Dev only — use migrations in production
+          logging: configService.get('NODE_ENV') === 'development',
+        };
+      },
       inject: [ConfigService],
     }),
 
@@ -77,12 +91,13 @@ import {
       isGlobal: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
+        const url = configService.get('REDIS_URL');
         const host = configService.get('REDIS_HOST', 'localhost');
         const port = configService.get<number>('REDIS_PORT', 6379);
         try {
-          const store = await redisStore({
-            socket: { host, port },
-          });
+          const store = await redisStore(
+            url ? { url } : { socket: { host, port } },
+          );
           return { store };
         } catch {
           // Fallback to in-memory cache if Redis unavailable
