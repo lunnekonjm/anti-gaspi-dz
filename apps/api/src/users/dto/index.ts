@@ -7,11 +7,15 @@ export class UpdateConsentDto {
   @IsBoolean()
   consent_payment: boolean;
 
-  @ApiProperty({ description: 'Consent for geolocation / الموافقة على تحديد الموقع' })
+  @ApiProperty({
+    description: 'Consent for geolocation / الموافقة على تحديد الموقع',
+  })
   @IsBoolean()
   consent_geolocation: boolean;
 
-  @ApiProperty({ description: 'Consent for notifications / الموافقة على الإشعارات' })
+  @ApiProperty({
+    description: 'Consent for notifications / الموافقة على الإشعارات',
+  })
   @IsBoolean()
   consent_notifications: boolean;
 }

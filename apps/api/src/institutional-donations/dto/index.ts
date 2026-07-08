@@ -6,11 +6,16 @@ export class CreateInstitutionalDonationDto {
   @IsUUID()
   association_id: string;
 
-  @ApiProperty({ description: 'Description of donated items / وصف المواد المتبرع بها' })
+  @ApiProperty({
+    description: 'Description of donated items / وصف المواد المتبرع بها',
+  })
   @IsString()
   description: string;
 
-  @ApiProperty({ description: 'Estimated quantity / الكمية المقدرة', example: '50 kg de pain' })
+  @ApiProperty({
+    description: 'Estimated quantity / الكمية المقدرة',
+    example: '50 kg de pain',
+  })
   @IsString()
   estimated_quantity: string;
 }

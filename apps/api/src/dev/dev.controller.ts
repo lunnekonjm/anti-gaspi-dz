@@ -2,9 +2,6 @@ import {
   Controller,
   Post,
   Delete,
-  UseGuards,
-  Headers,
-  UnauthorizedException,
   HttpCode,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -24,26 +21,18 @@ export class DevController {
     private usersRepository: Repository<User>,
   ) {}
 
-  private checkApiKey(apiKey: string) {
-    const validKey = process.env.DEV_API_KEY || 'antigaspi_secret_dev_key';
-    if (apiKey !== validKey) {
-      throw new UnauthorizedException('Invalid Dev API Key');
-    }
-  }
-
   @Post('seed')
-  async seed(@Headers('x-api-key') apiKey: string) {
-    this.checkApiKey(apiKey);
-
-    // Get the first MERCHANT user to attach offers to, or create one if none exists
+  async seed() {
+    // Get or create a MERCHANT user to attach offers to
     let user = await this.usersRepository.findOne({
       where: { role: UserRole.MERCHANT },
     });
     if (!user) {
-      user = new User();
-      user.phone_number = '+213000000000';
-      user.role = UserRole.MERCHANT;
-      user.display_name = 'Boulangerie Test';
+      user = this.usersRepository.create({
+        phone_number: '+213000000000',
+        role: UserRole.MERCHANT,
+        display_name: 'Boulangerie Test',
+      });
       await this.usersRepository.save(user);
     }
 
@@ -53,9 +42,9 @@ export class DevController {
       offer.initial_value = 1000;
       offer.sale_price = 300;
       offer.quantity_available = 5;
-      offer.pickup_window_start = new Date(Date.now() + 3600000); // in 1 hour
-      offer.pickup_window_end = new Date(Date.now() + 7200000); // in 2 hours
-      offer.expiry_date = new Date(Date.now() + 86400000).toISOString(); // tomorrow
+      offer.pickup_window_start = new Date(Date.now() + 3600000);
+      offer.pickup_window_end = new Date(Date.now() + 7200000);
+      offer.expiry_date = new Date(Date.now() + 86400000).toISOString();
       offer.expiry_type = ExpiryType.DLC;
       offer.status = OfferStatus.ACTIVE;
       offer.merchant_id = user.id;
@@ -68,11 +57,7 @@ export class DevController {
 
   @Delete('wipe')
   @HttpCode(204)
-  async wipe(@Headers('x-api-key') apiKey: string) {
-    this.checkApiKey(apiKey);
-
-    // Truncate tables except Users (to keep login valid)
-    // Careful with foreign keys
+  async wipe() {
     await this.dataSource.query('TRUNCATE TABLE reservations CASCADE');
     await this.dataSource.query('TRUNCATE TABLE offers CASCADE');
     await this.dataSource.query('TRUNCATE TABLE donations CASCADE');

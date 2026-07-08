@@ -22,9 +22,7 @@ import { UserRole } from '../common/enums';
 @ApiTags('Institutional Donations B2A / التبرعات المؤسسية')
 @Controller('api/v1/institutional-donations')
 export class InstitutionalDonationsController {
-  constructor(
-    private readonly service: InstitutionalDonationsService,
-  ) {}
+  constructor(private readonly service: InstitutionalDonationsService) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -32,7 +30,8 @@ export class InstitutionalDonationsController {
   @UseInterceptors(AuditLogInterceptor)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Announce surplus donation (professional) / الإعلان عن فائض (المهني)',
+    summary:
+      'Announce surplus donation (professional) / الإعلان عن فائض (المهني)',
   })
   async create(
     @CurrentUser() user: User,
@@ -50,10 +49,7 @@ export class InstitutionalDonationsController {
   @ApiOperation({
     summary: 'Accept donation (association) / قبول التبرع (الجمعية)',
   })
-  async accept(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-  ) {
+  async accept(@CurrentUser() user: User, @Param('id') id: string) {
     return this.service.accept(id, user.id);
   }
 
@@ -78,12 +74,10 @@ export class InstitutionalDonationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Sign transfer deed (association) / توقيع وثيقة التنازل (الجمعية)',
-    description: 'Sets liability_transferred_at — legal liability transfer moment',
+    description:
+      'Sets liability_transferred_at — legal liability transfer moment',
   })
-  async signTransferDeed(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-  ) {
+  async signTransferDeed(@CurrentUser() user: User, @Param('id') id: string) {
     return this.service.signTransferDeed(id, user.id);
   }
 

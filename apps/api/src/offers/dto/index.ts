@@ -11,21 +11,33 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ExpiryType } from '../../common/enums';
 
 export class CreateOfferDto {
-  @ApiProperty({ description: 'Offer title / عنوان العرض', example: 'Sac Surprise Boulangerie' })
+  @ApiProperty({
+    description: 'Offer title / عنوان العرض',
+    example: 'Sac Surprise Boulangerie',
+  })
   @IsString()
   title: string;
 
-  @ApiProperty({ description: 'Original value in DA / القيمة الأصلية بالدينار', example: 500 })
+  @ApiProperty({
+    description: 'Original value in DA / القيمة الأصلية بالدينار',
+    example: 500,
+  })
   @IsNumber()
   @Min(0)
   initial_value: number;
 
-  @ApiProperty({ description: 'Sale price in DA / سعر البيع بالدينار', example: 200 })
+  @ApiProperty({
+    description: 'Sale price in DA / سعر البيع بالدينار',
+    example: 200,
+  })
   @IsNumber()
   @Min(0)
   sale_price: number;
 
-  @ApiProperty({ description: 'Quantity available / الكمية المتوفرة', example: 5 })
+  @ApiProperty({
+    description: 'Quantity available / الكمية المتوفرة',
+    example: 5,
+  })
   @IsInt()
   @Min(1)
   quantity_available: number;
@@ -38,7 +50,11 @@ export class CreateOfferDto {
   @IsDateString()
   pickup_window_end: string;
 
-  @ApiProperty({ description: 'Expiry type DLC (hard limit) or DDM (advisory) / نوع الصلاحية', enum: ExpiryType })
+  @ApiProperty({
+    description:
+      'Expiry type DLC (hard limit) or DDM (advisory) / نوع الصلاحية',
+    enum: ExpiryType,
+  })
   @IsEnum(ExpiryType)
   expiry_type: ExpiryType;
 

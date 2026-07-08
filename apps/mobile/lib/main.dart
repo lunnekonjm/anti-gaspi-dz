@@ -17,6 +17,7 @@ import 'pages/shared/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox('settings_box');
   await dotenv.load(fileName: ".env");
   runApp(const AntiGaspiApp());
 }

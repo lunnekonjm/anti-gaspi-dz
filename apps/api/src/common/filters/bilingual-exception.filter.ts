@@ -23,11 +23,11 @@ interface BilingualError {
 
 /** Common error translations */
 const ERROR_TRANSLATIONS: Record<string, { fr: string; ar: string }> = {
-  'Unauthorized': {
+  Unauthorized: {
     fr: 'Non autorisé',
     ar: 'غير مصرح',
   },
-  'Forbidden': {
+  Forbidden: {
     fr: 'Accès interdit',
     ar: 'الوصول محظور',
   },
@@ -51,7 +51,7 @@ const ERROR_TRANSLATIONS: Record<string, { fr: string; ar: string }> = {
     fr: 'Entité non traitable',
     ar: 'كيان غير قابل للمعالجة',
   },
-  'Conflict': {
+  Conflict: {
     fr: 'Conflit',
     ar: 'تعارض',
   },
@@ -74,7 +74,10 @@ export class BilingualExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exResponse = exception.getResponse();
-      error = exception.name.replace(/Exception$/, '').replace(/([A-Z])/g, ' $1').trim();
+      error = exception.name
+        .replace(/Exception$/, '')
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
 
       if (typeof exResponse === 'object' && exResponse !== null) {
         const resp = exResponse as Record<string, any>;

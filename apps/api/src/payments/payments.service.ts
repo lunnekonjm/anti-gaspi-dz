@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -64,13 +59,12 @@ export class PaymentsService {
     const callbackUrl = `${this.configService.get('APP_URL')}/api/v1/payments/webhook`;
 
     // Use mock provider (will be swapped for SATIM/BaridiMob)
-    const paymentSession =
-      await this.mockPaymentProvider.createPaymentSession({
-        amount: Number(reservation.offer.sale_price),
-        currency: 'DZD',
-        reservationId: reservation.id,
-        callbackUrl,
-      });
+    const paymentSession = await this.mockPaymentProvider.createPaymentSession({
+      amount: Number(reservation.offer.sale_price),
+      currency: 'DZD',
+      reservationId: reservation.id,
+      callbackUrl,
+    });
 
     return paymentSession;
   }
@@ -117,9 +111,10 @@ export class PaymentsService {
    * Mock endpoint: simulate payment completion (dev only).
    */
   async simulateMockPayment(paymentReference: string, reservationId: string) {
-    const result = await this.mockPaymentProvider.simulatePaymentCompletion(
-      paymentReference,
-    );
+    const result =
+      await this.mockPaymentProvider.simulatePaymentCompletion(
+        paymentReference,
+      );
 
     return this.handleWebhook({
       payment_reference: result.payment_reference,

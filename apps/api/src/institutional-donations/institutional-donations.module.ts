@@ -11,7 +11,12 @@ import {
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([InstitutionalDonation, TransferDeed, User, AuditLog]),
+    TypeOrmModule.forFeature([
+      InstitutionalDonation,
+      TransferDeed,
+      User,
+      AuditLog,
+    ]),
   ],
   controllers: [InstitutionalDonationsController],
   providers: [InstitutionalDonationsService],

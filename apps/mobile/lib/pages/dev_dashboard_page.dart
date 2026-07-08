@@ -18,7 +18,7 @@ class _DevDashboardPageState extends State<DevDashboardPage> {
     setState(() => _isLoading = true);
     try {
       final dev = context.read<DevProvider>();
-      final baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000/api/v1';
+      final baseUrl = 'https://anti-gaspi-api.onrender.com/api/v1';
       final response = await http.post(
         Uri.parse('$baseUrl/dev/seed'),
         headers: {'x-api-key': dev.devApiKey},
@@ -40,7 +40,7 @@ class _DevDashboardPageState extends State<DevDashboardPage> {
     setState(() => _isLoading = true);
     try {
       final dev = context.read<DevProvider>();
-      final baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000/api/v1';
+      final baseUrl = 'https://anti-gaspi-api.onrender.com/api/v1';
       final response = await http.delete(
         Uri.parse('$baseUrl/dev/wipe'),
         headers: {'x-api-key': dev.devApiKey},

@@ -26,16 +26,14 @@ export class DonationsController {
     summary: 'Create donation (family tab) / إنشاء تبرع (تبويب العائلة)',
     description: 'Neighborhood from closed list only — no exact address',
   })
-  async create(
-    @CurrentUser() user: User,
-    @Body() dto: CreateDonationDto,
-  ) {
+  async create(@CurrentUser() user: User, @Body() dto: CreateDonationDto) {
     return this.donationsService.create(user.id, dto);
   }
 
   @Get()
   @ApiOperation({
-    summary: 'List available donations by neighborhood / قائمة التبرعات حسب الحي',
+    summary:
+      'List available donations by neighborhood / قائمة التبرعات حسب الحي',
   })
   async findAll(@Query('neighborhood') neighborhood?: string) {
     return this.donationsService.findByNeighborhood(neighborhood);
@@ -59,7 +57,8 @@ export class DonationsController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Send message (phone numbers stripped) / إرسال رسالة (أرقام الهاتف مخفية)',
+    summary:
+      'Send message (phone numbers stripped) / إرسال رسالة (أرقام الهاتف مخفية)',
   })
   async sendMessage(
     @CurrentUser() user: User,

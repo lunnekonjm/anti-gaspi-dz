@@ -3,7 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { DonationStatus } from '../../common/enums';
 
 export class CreateDonationDto {
-  @ApiProperty({ description: 'Title / العنوان', example: 'Couscous fait maison' })
+  @ApiProperty({
+    description: 'Title / العنوان',
+    example: 'Couscous fait maison',
+  })
   @IsString()
   title: string;
 
@@ -25,7 +28,10 @@ export class CreateDonationDto {
 }
 
 export class CreateMessageDto {
-  @ApiProperty({ description: 'Message content (phone numbers will be stripped) / محتوى الرسالة' })
+  @ApiProperty({
+    description:
+      'Message content (phone numbers will be stripped) / محتوى الرسالة',
+  })
   @IsString()
   content: string;
 }

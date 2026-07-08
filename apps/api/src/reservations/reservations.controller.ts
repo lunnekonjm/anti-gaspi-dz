@@ -22,9 +22,7 @@ import { UserRole } from '../common/enums';
 @ApiTags('Reservations / الحجوزات')
 @Controller('api/v1/reservations')
 export class ReservationsController {
-  constructor(
-    private readonly reservationsService: ReservationsService,
-  ) {}
+  constructor(private readonly reservationsService: ReservationsService) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
@@ -34,10 +32,7 @@ export class ReservationsController {
     summary: 'Create reservation / إنشاء حجز',
     description: 'Atomic booking with anti-overbooking protection',
   })
-  async create(
-    @CurrentUser() user: User,
-    @Body() dto: CreateReservationDto,
-  ) {
+  async create(@CurrentUser() user: User, @Body() dto: CreateReservationDto) {
     return this.reservationsService.create(user.id, dto);
   }
 
@@ -48,12 +43,10 @@ export class ReservationsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Redeem reservation via QR scan (merchant) / تأكيد الاستلام عبر مسح QR (التاجر)',
+    summary:
+      'Redeem reservation via QR scan (merchant) / تأكيد الاستلام عبر مسح QR (التاجر)',
   })
-  async redeem(
-    @Param('id') id: string,
-    @Body() dto: RedeemReservationDto,
-  ) {
+  async redeem(@Param('id') id: string, @Body() dto: RedeemReservationDto) {
     return this.reservationsService.redeem(id, dto.qr_code_token);
   }
 
@@ -65,10 +58,7 @@ export class ReservationsController {
   @ApiOperation({
     summary: 'Cancel reservation / إلغاء الحجز',
   })
-  async cancel(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-  ) {
+  async cancel(@CurrentUser() user: User, @Param('id') id: string) {
     return this.reservationsService.cancel(id, user.id);
   }
 

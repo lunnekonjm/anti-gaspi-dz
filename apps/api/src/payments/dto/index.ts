@@ -30,7 +30,10 @@ export class PaymentWebhookDto {
   @IsString()
   status: string;
 
-  @ApiProperty({ description: 'Webhook signature for verification', required: false })
+  @ApiProperty({
+    description: 'Webhook signature for verification',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   signature?: string;

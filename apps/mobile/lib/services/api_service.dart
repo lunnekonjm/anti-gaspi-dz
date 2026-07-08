@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Centralized API service for all backend communication.
 /// Handles JWT auth, bilingual errors, and base URL configuration.
 class ApiService {
-  String get _baseUrl => dotenv.env['API_URL'] ?? 'http://localhost:3000/api/v1';
+  String get _baseUrl => 'https://anti-gaspi-api.onrender.com/api/v1';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> get _token => _storage.read(key: 'jwt_token');

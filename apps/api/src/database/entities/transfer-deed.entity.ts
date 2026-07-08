@@ -37,10 +37,7 @@ export class TransferDeed {
   signed_at: Date | null;
 
   // Relations
-  @OneToOne(
-    () => InstitutionalDonation,
-    (donation) => donation.transfer_deed,
-  )
+  @OneToOne(() => InstitutionalDonation, (donation) => donation.transfer_deed)
   @JoinColumn({ name: 'institutional_donation_id' })
   institutional_donation: InstitutionalDonation;
 }

@@ -30,11 +30,17 @@ export class OffersController {
 
   @Get()
   @ApiOperation({
-    summary: 'List active offers (with optional geolocation filter) / قائمة العروض النشطة',
+    summary:
+      'List active offers (with optional geolocation filter) / قائمة العروض النشطة',
   })
   @ApiQuery({ name: 'lat', required: false, type: Number })
   @ApiQuery({ name: 'lng', required: false, type: Number })
-  @ApiQuery({ name: 'radius', required: false, type: Number, description: 'Radius in km' })
+  @ApiQuery({
+    name: 'radius',
+    required: false,
+    type: Number,
+    description: 'Radius in km',
+  })
   async findActive(
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
@@ -61,10 +67,7 @@ export class OffersController {
   @ApiOperation({
     summary: 'Create offer (merchant only) / إنشاء عرض (التجار فقط)',
   })
-  async create(
-    @CurrentUser() user: User,
-    @Body() dto: CreateOfferDto,
-  ) {
+  async create(@CurrentUser() user: User, @Body() dto: CreateOfferDto) {
     return this.offersService.create(user.id, dto);
   }
 

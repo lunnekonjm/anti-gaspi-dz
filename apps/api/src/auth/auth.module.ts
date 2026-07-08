@@ -18,7 +18,8 @@ import { User, OtpCode } from '../database/entities';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'default-secret',
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRATION', '7d') || '7d') as any,
+          expiresIn: (configService.get<string>('JWT_EXPIRATION', '7d') ||
+            '7d') as any,
         },
       }),
       inject: [ConfigService],

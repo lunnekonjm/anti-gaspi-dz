@@ -35,7 +35,8 @@ export class SponsorshipService {
     if (
       !campaign ||
       !campaign.active ||
-      campaign.sponsored_offers_count_used >= campaign.sponsored_offers_count_limit ||
+      campaign.sponsored_offers_count_used >=
+        campaign.sponsored_offers_count_limit ||
       Number(campaign.budget_remaining) <= 0
     ) {
       return false;

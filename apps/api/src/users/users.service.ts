@@ -21,10 +21,7 @@ export class UsersService {
    * Update granular consents — three separate toggles.
    * Each consent is recorded with a timestamp per Loi 18-07.
    */
-  async updateConsent(
-    userId: string,
-    dto: UpdateConsentDto,
-  ): Promise<User> {
+  async updateConsent(userId: string, dto: UpdateConsentDto): Promise<User> {
     await this.userRepository.update(userId, {
       consent_payment: dto.consent_payment,
       consent_geolocation: dto.consent_geolocation,
@@ -34,10 +31,7 @@ export class UsersService {
     return this.userRepository.findOneOrFail({ where: { id: userId } });
   }
 
-  async updateProfile(
-    userId: string,
-    dto: UpdateProfileDto,
-  ): Promise<User> {
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
     await this.userRepository.update(userId, dto);
     return this.userRepository.findOneOrFail({ where: { id: userId } });
   }
@@ -48,8 +42,6 @@ export class UsersService {
    */
   async deleteAccount(userId: string): Promise<void> {
     await this.userRepository.softDelete(userId);
-    this.logger.log(
-      `User ${userId} soft-deleted. Deferred purge scheduled.`,
-    );
+    this.logger.log(`User ${userId} soft-deleted. Deferred purge scheduled.`);
   }
 }

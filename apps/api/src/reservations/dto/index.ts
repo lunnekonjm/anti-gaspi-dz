@@ -6,7 +6,10 @@ export class CreateReservationDto {
   @IsUUID()
   offer_id: string;
 
-  @ApiProperty({ description: 'Quantity to reserve / الكمية المراد حجزها', default: 1 })
+  @ApiProperty({
+    description: 'Quantity to reserve / الكمية المراد حجزها',
+    default: 1,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
@@ -14,7 +17,9 @@ export class CreateReservationDto {
 }
 
 export class RedeemReservationDto {
-  @ApiProperty({ description: 'QR code token for verification / رمز التحقق من QR' })
+  @ApiProperty({
+    description: 'QR code token for verification / رمز التحقق من QR',
+  })
   @IsString()
   qr_code_token: string;
 }

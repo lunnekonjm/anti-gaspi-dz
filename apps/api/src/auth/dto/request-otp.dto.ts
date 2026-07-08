@@ -9,7 +9,8 @@ export class RequestOtpDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^\+213[567]\d{8}$/, {
-    message: 'Phone number must be a valid Algerian mobile number (E.164) / يجب أن يكون رقم هاتف جزائري صالح',
+    message:
+      'Phone number must be a valid Algerian mobile number (E.164) / يجب أن يكون رقم هاتف جزائري صالح',
   })
   phone_number: string;
 }

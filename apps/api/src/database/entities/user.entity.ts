@@ -61,16 +61,10 @@ export class User {
   @OneToMany(() => Donation, (donation) => donation.donor)
   donations: Donation[];
 
-  @OneToMany(
-    () => InstitutionalDonation,
-    (donation) => donation.professional,
-  )
+  @OneToMany(() => InstitutionalDonation, (donation) => donation.professional)
   institutional_donations_given: InstitutionalDonation[];
 
-  @OneToMany(
-    () => InstitutionalDonation,
-    (donation) => donation.association,
-  )
+  @OneToMany(() => InstitutionalDonation, (donation) => donation.association)
   institutional_donations_received: InstitutionalDonation[];
 
   @OneToMany(() => Message, (message) => message.sender)

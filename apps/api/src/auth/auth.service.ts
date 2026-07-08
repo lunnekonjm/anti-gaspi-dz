@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
@@ -42,7 +37,9 @@ export class AuthService {
    * Request OTP — sends a code via SMS.
    * Rate limited: max 5 requests per hour per phone number.
    */
-  async requestOtp(phoneNumber: string): Promise<{ message_fr: string; message_ar: string }> {
+  async requestOtp(
+    phoneNumber: string,
+  ): Promise<{ message_fr: string; message_ar: string }> {
     // Rate limiting: count OTPs sent in last hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentCount = await this.otpRepository.count({
@@ -65,9 +62,7 @@ export class AuthService {
 
     // Generate OTP code
     const code = this.generateOtpCode();
-    const expiresAt = new Date(
-      Date.now() + this.otpExpiryMinutes * 60 * 1000,
-    );
+    const expiresAt = new Date(Date.now() + this.otpExpiryMinutes * 60 * 1000);
 
     // Save OTP
     const otp = this.otpRepository.create({
@@ -93,7 +88,11 @@ export class AuthService {
   async verifyOtp(
     phoneNumber: string,
     code: string,
-  ): Promise<{ access_token: string; user: Partial<User>; is_new_user: boolean }> {
+  ): Promise<{
+    access_token: string;
+    user: Partial<User>;
+    is_new_user: boolean;
+  }> {
     // Find valid OTP
     const otp = await this.otpRepository.findOne({
       where: {
