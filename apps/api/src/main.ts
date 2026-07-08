@@ -24,7 +24,7 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
       callback(null, true); // Allow all origins for MVP testing
     },
     credentials: true,
