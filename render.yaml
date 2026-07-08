@@ -1,0 +1,40 @@
+services:
+  # 1. PostgreSQL Database
+  - type: pgr
+    name: anti-gaspi-db
+    plan: free
+    region: frankfurt # Plus proche de l'Algérie pour réduire la latence
+    databaseName: antigaspi
+    user: antigaspi_user
+
+  # 2. Redis Cache
+  - type: redis
+    name: anti-gaspi-redis
+    plan: free
+    region: frankfurt
+    maxmemoryPolicy: noeviction
+
+  # 3. API NestJS
+  - type: web
+    name: anti-gaspi-api
+    plan: free
+    region: frankfurt
+    env: node
+    buildCommand: "cd apps/api && npm install && npm run build"
+    startCommand: "cd apps/api && npm run start:prod"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: anti-gaspi-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: anti-gaspi-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: "https://anti-gaspi-dz.web.app"
+      - key: NODE_ENV
+        value: "production"

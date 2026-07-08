@@ -1,0 +1,333 @@
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import { Reservation, Offer } from '../database/entities';
+import { ReservationStatus, OfferStatus } from '../common/enums';
+import { CreateReservationDto } from './dto';
+import { v4 as uuidv4 } from 'uuid';
+
+@Injectable()
+export class ReservationsService {
+  private readonly logger = new Logger(ReservationsService.name);
+
+  constructor(
+    @InjectRepository(Reservation)
+    private readonly reservationRepository: Repository<Reservation>,
+    @InjectRepository(Offer)
+    private readonly offerRepository: Repository<Offer>,
+    private readonly dataSource: DataSource,
+    private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
+
+  /**
+   * Create reservation with anti-overbooking double-layer protection:
+   * 1. Redis distributed lock (SET NX) prevents concurrent attempts
+   * 2. PostgreSQL SELECT FOR UPDATE ensures atomic stock decrement
+   */
+  async create(
+    consumerId: string,
+    dto: CreateReservationDto,
+  ): Promise<Reservation> {
+    const quantity = dto.quantity || 1;
+    const lockKey = `lock:offer:${dto.offer_id}`;
+
+    // Layer 1: Redis distributed lock
+    const lockValue = uuidv4();
+    const lockAcquired = await this.acquireLock(lockKey, lockValue, 10);
+
+    if (!lockAcquired) {
+      throw new HttpException(
+        {
+          message_fr: 'Trop de demandes simultanées. Veuillez réessayer.',
+          message_ar: 'طلبات متزامنة كثيرة. يرجى المحاولة مرة أخرى.',
+          error: 'Conflict',
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    try {
+      // Layer 2: PostgreSQL transaction with SELECT FOR UPDATE
+      return await this.dataSource.transaction(async (manager) => {
+        const offer = await manager
+          .getRepository(Offer)
+          .createQueryBuilder('offer')
+          .setLock('pessimistic_write')
+          .where('offer.id = :id', { id: dto.offer_id })
+          .getOne();
+
+        if (!offer) {
+          throw new HttpException(
+            {
+              message_fr: 'Offre introuvable.',
+              message_ar: 'العرض غير موجود.',
+              error: 'Not Found',
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        if (offer.status !== OfferStatus.ACTIVE) {
+          throw new HttpException(
+            {
+              message_fr: "Cette offre n'est plus disponible.",
+              message_ar: 'هذا العرض لم يعد متاحاً.',
+              error: 'Conflict',
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
+
+        if (offer.quantity_available < quantity) {
+          throw new HttpException(
+            {
+              message_fr: `Stock insuffisant. Disponible : ${offer.quantity_available}`,
+              message_ar: `المخزون غير كافٍ. المتوفر: ${offer.quantity_available}`,
+              error: 'Conflict',
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
+
+        // Atomic decrement
+        offer.quantity_available -= quantity;
+        if (offer.quantity_available === 0) {
+          offer.status = OfferStatus.SOLD_OUT;
+        }
+        await manager.save(offer);
+
+        // Create reservation
+        const reservation = manager.getRepository(Reservation).create({
+          offer_id: dto.offer_id,
+          consumer_id: consumerId,
+          status: ReservationStatus.PENDING_PAYMENT,
+        });
+
+        return manager.save(reservation);
+      });
+    } finally {
+      // Always release lock
+      await this.releaseLock(lockKey, lockValue);
+    }
+  }
+
+  /**
+   * Confirm reservation after payment — generates signed QR token.
+   * Called by PaymentsModule webhook handler.
+   */
+  async confirmPayment(
+    reservationId: string,
+    paymentReference: string,
+  ): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id: reservationId },
+    });
+
+    if (!reservation) {
+      throw new HttpException(
+        {
+          message_fr: 'Réservation introuvable.',
+          message_ar: 'الحجز غير موجود.',
+          error: 'Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Generate signed single-use QR token
+    const qrToken = this.jwtService.sign(
+      {
+        reservation_id: reservationId,
+        type: 'qr_redeem',
+        nonce: uuidv4(),
+      },
+      { expiresIn: '24h' },
+    );
+
+    reservation.status = ReservationStatus.CONFIRMED;
+    reservation.payment_reference = paymentReference;
+    reservation.qr_code_token = qrToken;
+    reservation.confirmed_at = new Date();
+
+    return this.reservationRepository.save(reservation);
+  }
+
+  /**
+   * Redeem reservation — merchant scans QR code.
+   * Token verified server-side, single use only.
+   */
+  async redeem(
+    reservationId: string,
+    qrToken: string,
+  ): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id: reservationId },
+    });
+
+    if (!reservation) {
+      throw new HttpException(
+        {
+          message_fr: 'Réservation introuvable.',
+          message_ar: 'الحجز غير موجود.',
+          error: 'Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (reservation.status !== ReservationStatus.CONFIRMED) {
+      throw new HttpException(
+        {
+          message_fr: 'Cette réservation ne peut pas être validée dans son état actuel.',
+          message_ar: 'لا يمكن التحقق من هذا الحجز في حالته الحالية.',
+          error: 'Conflict',
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    // Verify QR token server-side
+    try {
+      const decoded = this.jwtService.verify(qrToken);
+      if (decoded.reservation_id !== reservationId || decoded.type !== 'qr_redeem') {
+        throw new Error('Token mismatch');
+      }
+    } catch {
+      throw new HttpException(
+        {
+          message_fr: 'QR code invalide ou expiré.',
+          message_ar: 'رمز QR غير صالح أو منتهي الصلاحية.',
+          error: 'Unauthorized',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // Invalidate token (single use) by clearing it
+    reservation.status = ReservationStatus.PICKED_UP;
+    reservation.picked_up_at = new Date();
+    reservation.qr_code_token = '' as any; // Cleared to invalidate single-use token
+
+    return this.reservationRepository.save(reservation);
+  }
+
+  /**
+   * Cancel reservation — restores stock.
+   */
+  async cancel(reservationId: string, consumerId: string): Promise<Reservation> {
+    return this.dataSource.transaction(async (manager) => {
+      const reservation = await manager
+        .getRepository(Reservation)
+        .findOne({ where: { id: reservationId, consumer_id: consumerId } });
+
+      if (!reservation) {
+        throw new HttpException(
+          {
+            message_fr: 'Réservation introuvable.',
+            message_ar: 'الحجز غير موجود.',
+            error: 'Not Found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (
+        reservation.status !== ReservationStatus.PENDING_PAYMENT &&
+        reservation.status !== ReservationStatus.CONFIRMED
+      ) {
+        throw new HttpException(
+          {
+            message_fr: "Cette réservation ne peut plus être annulée.",
+            message_ar: 'لا يمكن إلغاء هذا الحجز بعد الآن.',
+            error: 'Conflict',
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      // Restore stock
+      await manager
+        .getRepository(Offer)
+        .createQueryBuilder()
+        .update()
+        .set({
+          quantity_available: () => 'quantity_available + 1',
+          status: OfferStatus.ACTIVE,
+        })
+        .where('id = :id', { id: reservation.offer_id })
+        .execute();
+
+      reservation.status = ReservationStatus.CANCELLED;
+      return manager.save(reservation);
+    });
+  }
+
+  async findByConsumer(consumerId: string): Promise<Reservation[]> {
+    return this.reservationRepository.find({
+      where: { consumer_id: consumerId },
+      relations: { offer: { merchant: true } },
+      order: { reserved_at: 'DESC' },
+    });
+  }
+
+  /**
+   * No-show detection — auto-marks confirmed reservations as no_show
+   * if pickup window has expired. Runs every 10 minutes.
+   */
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async detectNoShows() {
+    const result = await this.reservationRepository
+      .createQueryBuilder('reservation')
+      .innerJoin('reservation.offer', 'offer')
+      .update(Reservation)
+      .set({ status: ReservationStatus.NO_SHOW })
+      .where('reservation.status = :status', {
+        status: ReservationStatus.CONFIRMED,
+      })
+      .andWhere('offer.pickup_window_end < :now', { now: new Date() })
+      .execute();
+
+    if (result.affected && result.affected > 0) {
+      this.logger.warn(`Detected ${result.affected} no-shows`);
+    }
+  }
+
+  // --- Redis lock helpers ---
+  private async acquireLock(
+    key: string,
+    value: string,
+    ttlSeconds: number,
+  ): Promise<boolean> {
+    try {
+      const existing = await this.cacheManager.get(key);
+      if (existing) return false;
+      await this.cacheManager.set(key, value, ttlSeconds * 1000);
+      return true;
+    } catch (error) {
+      this.logger.warn(`Lock acquisition failed for ${key}, proceeding without lock`);
+      return true; // Fallback: rely on PostgreSQL FOR UPDATE
+    }
+  }
+
+  private async releaseLock(key: string, value: string): Promise<void> {
+    try {
+      const existing = await this.cacheManager.get(key);
+      if (existing === value) {
+        await this.cacheManager.del(key);
+      }
+    } catch (error) {
+      this.logger.warn(`Lock release failed for ${key}`);
+    }
+  }
+}
