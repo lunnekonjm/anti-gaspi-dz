@@ -1,11 +1,19 @@
-import { Controller, Post, Delete, UseGuards, Headers, UnauthorizedException, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Delete,
+  UseGuards,
+  Headers,
+  UnauthorizedException,
+  HttpCode,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Offer } from '../database/entities/offer.entity';
 import { User } from '../database/entities/user.entity';
 import { UserRole, OfferStatus, ExpiryType } from '../common/enums';
 
-@Controller('dev')
+@Controller('api/v1/dev')
 export class DevController {
   constructor(
     @InjectDataSource()
@@ -28,9 +36,13 @@ export class DevController {
     this.checkApiKey(apiKey);
 
     // Get the first MERCHANT user to attach offers to
-    const user = await this.usersRepository.findOne({ where: { role: UserRole.MERCHANT } });
+    const user = await this.usersRepository.findOne({
+      where: { role: UserRole.MERCHANT },
+    });
     if (!user) {
-      throw new UnauthorizedException('No MERCHANT user found to attach offers to');
+      throw new UnauthorizedException(
+        'No MERCHANT user found to attach offers to',
+      );
     }
 
     const dummyOffers = Array.from({ length: 5 }).map((_, i) => {
@@ -62,7 +74,9 @@ export class DevController {
     await this.dataSource.query('TRUNCATE TABLE reservations CASCADE');
     await this.dataSource.query('TRUNCATE TABLE offers CASCADE');
     await this.dataSource.query('TRUNCATE TABLE donations CASCADE');
-    await this.dataSource.query('TRUNCATE TABLE institutional_donations CASCADE');
+    await this.dataSource.query(
+      'TRUNCATE TABLE institutional_donations CASCADE',
+    );
     return { success: true };
   }
 }
