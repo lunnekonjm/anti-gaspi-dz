@@ -59,8 +59,12 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
-    } on ApiException catch (e) {
-      _errorMessage = e.getMessage(_selectedLanguage);
+    } catch (e) {
+      if (e is ApiException) {
+        _errorMessage = e.getMessage(_selectedLanguage);
+      } else {
+        _errorMessage = _selectedLanguage == 'ar' ? 'خطأ في الاتصال بالخادم (Le serveur démarre peut-être...)' : 'Erreur de connexion (Le serveur démarre peut-être...)';
+      }
       _isLoading = false;
       notifyListeners();
       return false;
@@ -73,15 +77,19 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _api.verifyOtp(phoneNumber, code);
-      _user = response['user'];
-      _isNewUser = response['is_new_user'] ?? false;
-      _isAuthenticated = true;
-      _isLoading = false;
-      notifyListeners();
+      final data = await _api.verifyOtp(phoneNumber, code);
+      final token = data['access_token'];
+      _isNewUser = data['is_new_user'] ?? false;
+      
+      await _storage.write(key: 'jwt_token', value: token);
+      await _loadSession();
       return true;
-    } on ApiException catch (e) {
-      _errorMessage = e.getMessage(_selectedLanguage);
+    } catch (e) {
+      if (e is ApiException) {
+        _errorMessage = e.getMessage(_selectedLanguage);
+      } else {
+        _errorMessage = _selectedLanguage == 'ar' ? 'خطأ في الاتصال' : 'Erreur de connexion';
+      }
       _isLoading = false;
       notifyListeners();
       return false;
