@@ -1,12 +1,12 @@
-services:
+databases:
   # 1. PostgreSQL Database
-  - type: pgr
-    name: anti-gaspi-db
+  - name: anti-gaspi-db
     plan: free
     region: frankfurt # Plus proche de l'Algérie pour réduire la latence
     databaseName: antigaspi
     user: antigaspi_user
 
+services:
   # 2. Redis Cache
   - type: redis
     name: anti-gaspi-redis
