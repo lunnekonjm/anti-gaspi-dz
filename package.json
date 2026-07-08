@@ -1,0 +1,11 @@
+{
+  "name": "anti-gaspi-dz-root",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "cd apps/api && npm install --include=dev && npm run build",
+    "start": "cd apps/api && npm run start:prod"
+  }
+}
