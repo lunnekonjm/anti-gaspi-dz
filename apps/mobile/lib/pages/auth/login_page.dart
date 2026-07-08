@@ -39,10 +39,9 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 60),
               // Logo and title
-              Icon(
-                Icons.eco_rounded,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
+              Image.asset(
+                'assets/images/logo.png',
+                height: 80,
               ),
               const SizedBox(height: 16),
               Text(
@@ -145,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.infinity,
+                    minimumSize: const Size(double.infinity, 50),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: auth.isLoading
