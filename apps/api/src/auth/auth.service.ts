@@ -165,6 +165,11 @@ export class AuthService {
   }
 
   private generateOtpCode(): string {
+    // In development (mocked SMS), always use 123456 to make testing easy
+    if (process.env.SMS_PROVIDER === 'console' || !process.env.SMS_PROVIDER) {
+      return '123456';
+    }
+
     const digits = '0123456789';
     let code = '';
     for (let i = 0; i < this.otpLength; i++) {
