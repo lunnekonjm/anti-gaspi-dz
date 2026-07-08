@@ -35,14 +35,19 @@ export class DevController {
   async seed(@Headers('x-api-key') apiKey: string) {
     this.checkApiKey(apiKey);
 
-    // Get the first MERCHANT user to attach offers to
-    const user = await this.usersRepository.findOne({
+    // Get the first MERCHANT user to attach offers to, or create one if none exists
+    let user = await this.usersRepository.findOne({
       where: { role: UserRole.MERCHANT },
     });
     if (!user) {
-      throw new UnauthorizedException(
-        'No MERCHANT user found to attach offers to',
-      );
+      user = new User();
+      user.phone_number = '+213000000000';
+      user.role = UserRole.MERCHANT;
+      user.business_name = 'Boulangerie Test';
+      user.full_name = 'Dev Test Merchant';
+      user.latitude = 36.7525;
+      user.longitude = 3.04197;
+      await this.usersRepository.save(user);
     }
 
     const dummyOffers = Array.from({ length: 5 }).map((_, i) => {
