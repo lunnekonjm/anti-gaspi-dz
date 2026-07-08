@@ -14,7 +14,7 @@ import type { Cache } from 'cache-manager';
 import { Reservation, Offer } from '../database/entities';
 import { ReservationStatus, OfferStatus } from '../common/enums';
 import { CreateReservationDto } from './dto';
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ReservationsService {
@@ -43,7 +43,7 @@ export class ReservationsService {
     const lockKey = `lock:offer:${dto.offer_id}`;
 
     // Layer 1: Redis distributed lock
-    const lockValue = uuidv4();
+    const lockValue = crypto.randomUUID();
     const lockAcquired = await this.acquireLock(lockKey, lockValue, 10);
 
     if (!lockAcquired) {
@@ -150,7 +150,7 @@ export class ReservationsService {
       {
         reservation_id: reservationId,
         type: 'qr_redeem',
-        nonce: uuidv4(),
+        nonce: crypto.randomUUID(),
       },
       { expiresIn: '24h' },
     );
@@ -167,10 +167,7 @@ export class ReservationsService {
    * Redeem reservation — merchant scans QR code.
    * Token verified server-side, single use only.
    */
-  async redeem(
-    reservationId: string,
-    qrToken: string,
-  ): Promise<Reservation> {
+  async redeem(reservationId: string, qrToken: string): Promise<Reservation> {
     const reservation = await this.reservationRepository.findOne({
       where: { id: reservationId },
     });
@@ -189,7 +186,8 @@ export class ReservationsService {
     if (reservation.status !== ReservationStatus.CONFIRMED) {
       throw new HttpException(
         {
-          message_fr: 'Cette réservation ne peut pas être validée dans son état actuel.',
+          message_fr:
+            'Cette réservation ne peut pas être validée dans son état actuel.',
           message_ar: 'لا يمكن التحقق من هذا الحجز في حالته الحالية.',
           error: 'Conflict',
         },
@@ -200,7 +198,10 @@ export class ReservationsService {
     // Verify QR token server-side
     try {
       const decoded = this.jwtService.verify(qrToken);
-      if (decoded.reservation_id !== reservationId || decoded.type !== 'qr_redeem') {
+      if (
+        decoded.reservation_id !== reservationId ||
+        decoded.type !== 'qr_redeem'
+      ) {
         throw new Error('Token mismatch');
       }
     } catch {
@@ -225,7 +226,10 @@ export class ReservationsService {
   /**
    * Cancel reservation — restores stock.
    */
-  async cancel(reservationId: string, consumerId: string): Promise<Reservation> {
+  async cancel(
+    reservationId: string,
+    consumerId: string,
+  ): Promise<Reservation> {
     return this.dataSource.transaction(async (manager) => {
       const reservation = await manager
         .getRepository(Reservation)
@@ -248,7 +252,7 @@ export class ReservationsService {
       ) {
         throw new HttpException(
           {
-            message_fr: "Cette réservation ne peut plus être annulée.",
+            message_fr: 'Cette réservation ne peut plus être annulée.',
             message_ar: 'لا يمكن إلغاء هذا الحجز بعد الآن.',
             error: 'Conflict',
           },
@@ -315,7 +319,9 @@ export class ReservationsService {
       await this.cacheManager.set(key, value, ttlSeconds * 1000);
       return true;
     } catch (error) {
-      this.logger.warn(`Lock acquisition failed for ${key}, proceeding without lock`);
+      this.logger.warn(
+        `Lock acquisition failed for ${key}, proceeding without lock`,
+      );
       return true; // Fallback: rely on PostgreSQL FOR UPDATE
     }
   }

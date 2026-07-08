@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 
 /**
  * Mock payment provider for development and testing.
@@ -20,7 +20,7 @@ export class MockPaymentProvider {
     payment_reference: string;
     qr_data: string;
   }> {
-    const paymentReference = `MOCK_${uuidv4().slice(0, 8).toUpperCase()}`;
+    const paymentReference = `MOCK_${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
     this.logger.log(
       `💳 Mock payment session created: ${paymentReference} for ${params.amount} ${params.currency}`,

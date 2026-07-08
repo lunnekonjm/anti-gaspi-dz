@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -14,8 +9,8 @@ import {
 import { InstitutionalDonationStatus, UserRole } from '../common/enums';
 import { CreateInstitutionalDonationDto } from './dto';
 import PDFDocument from 'pdfkit';
+import { stripPhoneNumbers } from '../common/utils/phone-filter.util';
 import * as crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class InstitutionalDonationsService {
@@ -67,7 +62,10 @@ export class InstitutionalDonationsService {
   /**
    * Accept donation (association only).
    */
-  async accept(donationId: string, associationId: string): Promise<InstitutionalDonation> {
+  async accept(
+    donationId: string,
+    associationId: string,
+  ): Promise<InstitutionalDonation> {
     const donation = await this.donationRepository.findOne({
       where: { id: donationId, association_id: associationId },
     });
@@ -103,9 +101,7 @@ export class InstitutionalDonationsService {
    * PDF generated with hash for integrity verification.
    * liability_transferred_at is set ONLY after explicit signature.
    */
-  async generateTransferDeed(
-    donationId: string,
-  ): Promise<TransferDeed> {
+  async generateTransferDeed(donationId: string): Promise<TransferDeed> {
     const donation = await this.donationRepository.findOne({
       where: { id: donationId },
       relations: { professional: true, association: true },
@@ -114,7 +110,8 @@ export class InstitutionalDonationsService {
     if (!donation || donation.status !== InstitutionalDonationStatus.ACCEPTED) {
       throw new HttpException(
         {
-          message_fr: 'Le don doit être accepté avant de générer le bon de cession.',
+          message_fr:
+            'Le don doit être accepté avant de générer le bon de cession.',
           message_ar: 'يجب قبول التبرع قبل إنشاء وثيقة التنازل.',
           error: 'Conflict',
         },
@@ -161,7 +158,10 @@ export class InstitutionalDonationsService {
       where: { id: donationId, association_id: associationId },
     });
 
-    if (!donation || donation.status !== InstitutionalDonationStatus.TRANSFERRED) {
+    if (
+      !donation ||
+      donation.status !== InstitutionalDonationStatus.TRANSFERRED
+    ) {
       throw new HttpException(
         {
           message_fr: 'Le bon de cession doit être généré avant la signature.',
@@ -186,7 +186,9 @@ export class InstitutionalDonationsService {
     return this.donationRepository.save(donation);
   }
 
-  async findByProfessional(professionalId: string): Promise<InstitutionalDonation[]> {
+  async findByProfessional(
+    professionalId: string,
+  ): Promise<InstitutionalDonation[]> {
     return this.donationRepository.find({
       where: { professional_id: professionalId },
       relations: { association: true },
@@ -194,7 +196,9 @@ export class InstitutionalDonationsService {
     });
   }
 
-  async findByAssociation(associationId: string): Promise<InstitutionalDonation[]> {
+  async findByAssociation(
+    associationId: string,
+  ): Promise<InstitutionalDonation[]> {
     return this.donationRepository.find({
       where: { association_id: associationId },
       relations: { professional: true },
@@ -219,19 +223,25 @@ export class InstitutionalDonationsService {
       doc.on('error', reject);
 
       // Header
-      doc.fontSize(20).text('Bon de Cession / وثيقة التنازل', { align: 'center' });
+      doc
+        .fontSize(20)
+        .text('Bon de Cession / وثيقة التنازل', { align: 'center' });
       doc.moveDown();
       doc.fontSize(12).text(`Date: ${new Date().toLocaleDateString('fr-DZ')}`);
       doc.moveDown();
 
       // Donor info
       doc.fontSize(14).text('Donateur / المتبرع:');
-      doc.fontSize(12).text(`Nom: ${donation.professional?.display_name || 'N/A'}`);
+      doc
+        .fontSize(12)
+        .text(`Nom: ${donation.professional?.display_name || 'N/A'}`);
       doc.moveDown();
 
       // Association info
       doc.fontSize(14).text('Association bénéficiaire / الجمعية المستفيدة:');
-      doc.fontSize(12).text(`Nom: ${donation.association?.display_name || 'N/A'}`);
+      doc
+        .fontSize(12)
+        .text(`Nom: ${donation.association?.display_name || 'N/A'}`);
       doc.moveDown();
 
       // Donation details
@@ -241,10 +251,12 @@ export class InstitutionalDonationsService {
       doc.moveDown(2);
 
       // Legal notice
-      doc.fontSize(10).text(
-        'La responsabilité sanitaire est transférée à l\'association au moment de la signature de ce document.',
-        { align: 'center' },
-      );
+      doc
+        .fontSize(10)
+        .text(
+          "La responsabilité sanitaire est transférée à l'association au moment de la signature de ce document.",
+          { align: 'center' },
+        );
       doc.text(
         'تنتقل المسؤولية الصحية إلى الجمعية عند التوقيع على هذه الوثيقة.',
         { align: 'center' },
@@ -252,9 +264,13 @@ export class InstitutionalDonationsService {
       doc.moveDown(2);
 
       // Signature lines
-      doc.text('Signature du donateur / توقيع المتبرع: _______________________');
+      doc.text(
+        'Signature du donateur / توقيع المتبرع: _______________________',
+      );
       doc.moveDown();
-      doc.text('Signature de l\'association / توقيع الجمعية: _______________________');
+      doc.text(
+        "Signature de l'association / توقيع الجمعية: _______________________",
+      );
 
       // ID and timestamp
       doc.moveDown(2);
