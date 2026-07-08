@@ -24,7 +24,9 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: configService.get('FRONTEND_URL', 'https://app.antigaspi.dz'),
+    origin: (origin, callback) => {
+      callback(null, true); // Allow all origins for MVP testing
+    },
     credentials: true,
   });
 
