@@ -13,6 +13,7 @@ services:
     plan: free
     region: frankfurt
     maxmemoryPolicy: noeviction
+    ipAllowList: []
 
   # 3. API NestJS
   - type: web
