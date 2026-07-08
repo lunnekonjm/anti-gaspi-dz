@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import 'create_institutional_donation_page.dart';
 
 /// B2A Institutional Donations page — professional-to-association donations.

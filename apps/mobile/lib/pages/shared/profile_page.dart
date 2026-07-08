@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/dev_provider.dart';
+import '../dev_dashboard_page.dart';
 
 /// Profile page with settings, language toggle, account deletion.
 class ProfilePage extends StatelessWidget {
@@ -59,6 +61,35 @@ class ProfilePage extends StatelessWidget {
                 ],
                 selected: {auth.selectedLanguage},
                 onSelectionChanged: (v) => auth.setLanguage(v.first),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Dev Mode Toggle (MVP Showcase)
+          Consumer<DevProvider>(
+            builder: (context, dev, _) => Card(
+              color: dev.isDevMode ? Colors.deepOrange.shade50 : null,
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text("Mode Développeur / Admin"),
+                    subtitle: const Text("Afficher les indicateurs Mock"),
+                    value: dev.isDevMode,
+                    activeColor: Colors.deepOrange,
+                    onChanged: (v) => dev.toggleDevMode(v),
+                    secondary: const Icon(Icons.bug_report, color: Colors.deepOrange),
+                  ),
+                  if (dev.isDevMode)
+                    ListTile(
+                      leading: const Icon(Icons.admin_panel_settings, color: Colors.deepOrange),
+                      title: const Text("Ouvrir le Dashboard Admin", style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.deepOrange),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const DevDashboardPage()));
+                      },
+                    ),
+                ],
               ),
             ),
           ),

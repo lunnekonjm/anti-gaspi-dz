@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../providers/reservations_provider.dart';
+import '../../widgets/dev_badge.dart';
 
 class ReservationStatusPage extends StatefulWidget {
   final Map<String, dynamic> reservation;
@@ -78,15 +79,18 @@ class _ReservationStatusPageState extends State<ReservationStatusPage> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () async {
-                  final provider = context.read<ReservationsProvider>();
-                  final session = await provider.initiatePayment(widget.reservation['id']);
-                  if (session != null && session['payment_url'] != null) {
-                    // TODO: Open WebView for BaridiMob payment
-                  }
-                },
-                child: Text(l10n.payNow),
+              DevBadge(
+                message: "Paiement simulé. En production, ceci redirigera vers l'interface SATIM/BaridiMob.",
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final provider = context.read<ReservationsProvider>();
+                    final session = await provider.initiatePayment(widget.reservation['id']);
+                    if (session != null && session['payment_url'] != null) {
+                      // TODO: Open WebView for BaridiMob payment
+                    }
+                  },
+                  child: Text(l10n.payNow),
+                ),
               ),
             ],
             const Spacer(),

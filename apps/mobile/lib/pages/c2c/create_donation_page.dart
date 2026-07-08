@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/donations_provider.dart';
+import '../../widgets/dev_badge.dart';
 
 class CreateDonationPage extends StatefulWidget {
   const CreateDonationPage({super.key});
@@ -49,12 +50,15 @@ class _CreateDonationPageState extends State<CreateDonationPage> {
               validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedNeighborhood,
-              decoration: InputDecoration(labelText: l10n.selectNeighborhood),
-              items: communes.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-              onChanged: (v) => setState(() => _selectedNeighborhood = v),
-              validator: (v) => v == null ? 'Champ requis' : null,
+            DevBadge(
+              message: "Géolocalisation bloquée par design pour protéger la vie privée des familles. Liste des communes mockée.",
+              child: DropdownButtonFormField<String>(
+                value: _selectedNeighborhood,
+                decoration: InputDecoration(labelText: l10n.selectNeighborhood),
+                items: communes.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                onChanged: (v) => setState(() => _selectedNeighborhood = v),
+                validator: (v) => v == null ? 'Champ requis' : null,
+              ),
             ),
             const SizedBox(height: 16),
             Container(

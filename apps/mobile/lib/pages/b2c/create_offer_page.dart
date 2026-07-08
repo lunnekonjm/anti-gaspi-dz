@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/offers_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -124,7 +124,7 @@ class _CreateOfferPageState extends State<CreateOfferPage> {
               validator: (v) => v == null || v.isEmpty ? '*' : null,
             ),
             const SizedBox(height: 24),
-            Text(l10n.pickupWindow, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text("${l10n.pickupStart} - ${l10n.pickupEnd}", style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [

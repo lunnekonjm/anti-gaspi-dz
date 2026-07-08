@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/dev_badge.dart';
 import 'otp_page.dart';
 
 /// Login page with phone number input and language selection.
@@ -124,33 +125,40 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 24),
 
               // Submit button
-              ElevatedButton(
-                onPressed: auth.isLoading
-                    ? null
-                    : () async {
-                        if (_formKey.currentState!.validate()) {
-                          final phone = '+213${_phoneController.text.replaceAll(' ', '')}';
-                          final success = await auth.requestOtp(phone);
-                          if (success && mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => OtpPage(phoneNumber: phone),
-                              ),
-                            );
+              DevBadge(
+                message: "SMS non envoyé (Mock). Regardez la console du backend (Render) pour le code OTP généré, ou utilisez 123456 en mode dev.",
+                child: ElevatedButton(
+                  onPressed: auth.isLoading
+                      ? null
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            final phone = '+213${_phoneController.text.replaceAll(' ', '')}';
+                            final success = await auth.requestOtp(phone);
+                            if (success && mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OtpPage(phoneNumber: phone),
+                                ),
+                              );
+                            }
                           }
-                        }
-                      },
-                child: auth.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(l10n.sendOtp),
+                        },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: auth.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(l10n.sendOtp, style: const TextStyle(fontSize: 16)),
+                ),
               ),
             ],
           ),

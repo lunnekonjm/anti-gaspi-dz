@@ -16,6 +16,7 @@ import { PricingModule } from './pricing/pricing.module';
 import { DonationsModule } from './donations/donations.module';
 import { InstitutionalDonationsModule } from './institutional-donations/institutional-donations.module';
 import { SponsorshipModule } from './sponsorship/sponsorship.module';
+import { DevModule } from './dev/dev.module';
 
 // Entities
 import {

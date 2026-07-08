@@ -35,6 +35,8 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: DEV_API_KEY
+        generateValue: true
       - key: FRONTEND_URL
         value: "https://anti-gaspi-dz.web.app"
       - key: NODE_ENV

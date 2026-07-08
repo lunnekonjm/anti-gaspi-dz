@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../providers/donations_provider.dart';
 import 'create_donation_page.dart';
