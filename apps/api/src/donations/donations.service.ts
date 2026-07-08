@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { Donation, Message, Report } from '../database/entities';
 import { CreateDonationDto, CreateMessageDto, CreateReportDto } from './dto';
 import { stripPhoneNumbers } from '../common/utils/phone-filter.util';
-import { ALGERIAN_COMMUNES } from './communes.data';
+import { COMMUNES } from './communes.data';
 
 @Injectable()
 export class DonationsService {
@@ -30,7 +30,7 @@ export class DonationsService {
    */
   async create(donorId: string, dto: CreateDonationDto): Promise<Donation> {
     // Validate neighborhood against closed list
-    if (!ALGERIAN_COMMUNES.includes(dto.neighborhood)) {
+    if (!COMMUNES.includes(dto.neighborhood)) {
       throw new HttpException(
         {
           message_fr: `Quartier invalide. Veuillez choisir parmi la liste proposée.`,
@@ -127,6 +127,6 @@ export class DonationsService {
    * Get the list of available communes for the dropdown.
    */
   getCommunes(): string[] {
-    return ALGERIAN_COMMUNES;
+    return COMMUNES;
   }
 }

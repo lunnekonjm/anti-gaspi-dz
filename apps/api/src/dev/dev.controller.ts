@@ -3,6 +3,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Offer } from '../database/entities/offer.entity';
 import { User } from '../database/entities/user.entity';
+import { UserRole, OfferStatus, ExpiryType } from '../common/enums';
 
 @Controller('dev')
 export class DevController {
@@ -26,24 +27,24 @@ export class DevController {
   async seed(@Headers('x-api-key') apiKey: string) {
     this.checkApiKey(apiKey);
 
-    // Get the first B2C user to attach offers to
-    const user = await this.usersRepository.findOne({ where: { role: 'b2c' } });
+    // Get the first MERCHANT user to attach offers to
+    const user = await this.usersRepository.findOne({ where: { role: UserRole.MERCHANT } });
     if (!user) {
-      throw new UnauthorizedException('No B2C user found to attach offers to');
+      throw new UnauthorizedException('No MERCHANT user found to attach offers to');
     }
 
     const dummyOffers = Array.from({ length: 5 }).map((_, i) => {
       const offer = new Offer();
       offer.title = `Offre Dev Test ${i + 1}`;
-      offer.initialValue = 1000;
-      offer.saleValue = 300;
-      offer.quantity = 5;
-      offer.pickupStart = new Date(Date.now() + 3600000); // in 1 hour
-      offer.pickupEnd = new Date(Date.now() + 7200000); // in 2 hours
-      offer.expiryDate = new Date(Date.now() + 86400000); // tomorrow
-      offer.expiryType = 'DLC';
-      offer.status = 'active';
-      offer.merchantId = user.id;
+      offer.initial_value = 1000;
+      offer.sale_price = 300;
+      offer.quantity_available = 5;
+      offer.pickup_window_start = new Date(Date.now() + 3600000); // in 1 hour
+      offer.pickup_window_end = new Date(Date.now() + 7200000); // in 2 hours
+      offer.expiry_date = new Date(Date.now() + 86400000).toISOString(); // tomorrow
+      offer.expiry_type = ExpiryType.DLC;
+      offer.status = OfferStatus.ACTIVE;
+      offer.merchant_id = user.id;
       return offer;
     });
 
