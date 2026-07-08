@@ -15,6 +15,8 @@ class DonationsListPage extends StatefulWidget {
 }
 
 class _DonationsListPageState extends State<DonationsListPage> {
+  String? _selectedCommune;
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +27,11 @@ class _DonationsListPageState extends State<DonationsListPage> {
     });
   }
 
+  void _onCommuneChanged(String? commune) {
+    setState(() => _selectedCommune = commune);
+    context.read<DonationsProvider>().loadDonations(neighborhood: commune);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -32,37 +39,106 @@ class _DonationsListPageState extends State<DonationsListPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tabFamily)),
-      body: donations.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : donations.donations.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.volunteer_activism_outlined,
-                        size: 80,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.noOffersAvailable,
-                        style: TextStyle(color: Colors.grey.shade500),
-                      ),
-                    ],
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => donations.loadDonations(),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: donations.donations.length,
-                    itemBuilder: (context, index) {
-                      final donation = donations.donations[index] as Map<String, dynamic>;
-                      return _DonationCard(donation: donation);
-                    },
-                  ),
+      body: Column(
+        children: [
+          // ── Commune filter ──
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.location_on, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: donations.communes.isEmpty
+                      ? const Text('Chargement des quartiers...')
+                      : DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedCommune,
+                            hint: const Text('Tous les quartiers'),
+                            isExpanded: true,
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('Tous les quartiers'),
+                              ),
+                              ...donations.communes.map(
+                                (c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, overflow: TextOverflow.ellipsis),
+                                ),
+                              ),
+                            ],
+                            onChanged: _onCommuneChanged,
+                          ),
+                        ),
+                ),
+                if (_selectedCommune != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    onPressed: () => _onCommuneChanged(null),
+                    tooltip: 'Réinitialiser le filtre',
+                  ),
+              ],
+            ),
+          ),
+          // ── Donations list ──
+          Expanded(
+            child: donations.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : donations.donations.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.volunteer_activism_outlined,
+                              size: 80,
+                              color: Colors.grey.shade300,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedCommune != null
+                                  ? 'Aucun don dans ce quartier'
+                                  : l10n.noOffersAvailable,
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                            if (_selectedCommune != null) ...[
+                              const SizedBox(height: 12),
+                              TextButton(
+                                onPressed: () => _onCommuneChanged(null),
+                                child: const Text('Voir tous les quartiers'),
+                              ),
+                            ],
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () => donations.loadDonations(
+                          neighborhood: _selectedCommune,
+                        ),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: donations.donations.length,
+                          itemBuilder: (context, index) {
+                            final donation = donations.donations[index]
+                                as Map<String, dynamic>;
+                            return _DonationCard(donation: donation);
+                          },
+                        ),
+                      ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -84,6 +160,8 @@ class _DonationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final status = donation['status'] ?? 'available';
+    final isReserved = status == 'reserved';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -92,11 +170,34 @@ class _DonationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              donation['title'] ?? '',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    donation['title'] ?? '',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
+                ),
+                if (isReserved)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Réservé',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade800,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -115,6 +216,17 @@ class _DonationCard extends StatelessWidget {
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
                 const Spacer(),
+                // Donor name
+                if (donation['donor']?['display_name'] != null) ...[
+                  Icon(Icons.person, size: 16, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
+                  Text(
+                    donation['donor']['display_name'],
+                    style: TextStyle(
+                        color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                ],
+                const SizedBox(width: 8),
                 // Share button
                 IconButton(
                   icon: const Icon(Icons.share, size: 20),
@@ -154,11 +266,18 @@ class _DonationCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Open messaging
-                },
+                onPressed: isReserved
+                    ? null
+                    : () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Messagerie en cours de développement (MVP)'),
+                          ),
+                        );
+                      },
                 icon: const Icon(Icons.message_outlined),
-                label: Text(l10n.sendMessage),
+                label: Text(isReserved ? 'Don déjà réservé' : l10n.sendMessage),
               ),
             ),
           ],

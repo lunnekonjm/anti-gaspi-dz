@@ -39,122 +39,74 @@ export class DevController {
 
   @Post('seed')
   async seed() {
-    // ─── 1. Create users for each role ───
-    let merchant = await this.usersRepository.findOne({
-      where: { role: UserRole.MERCHANT },
-    });
-    if (!merchant) {
-      merchant = this.usersRepository.create({
-        phone_number: '+213550000001',
-        role: UserRole.MERCHANT,
-        display_name: 'Boulangerie El Baraka',
-      });
-      await this.usersRepository.save(merchant);
-    }
+    // ─── 1. Utilisateurs réalistes ───
+    const findOrCreate = async (phone: string, role: UserRole, name: string) => {
+      let user = await this.usersRepository.findOne({ where: { phone_number: phone } });
+      if (!user) {
+        user = this.usersRepository.create({ phone_number: phone, role, display_name: name });
+        await this.usersRepository.save(user);
+      }
+      return user;
+    };
 
-    let merchant2 = await this.usersRepository.findOne({
-      where: { phone_number: '+213550000005' },
-    });
-    if (!merchant2) {
-      merchant2 = this.usersRepository.create({
-        phone_number: '+213550000005',
-        role: UserRole.MERCHANT,
-        display_name: 'Pâtisserie Dziriya',
-      });
-      await this.usersRepository.save(merchant2);
-    }
+    const boulangerie = await findOrCreate('+213551234567', UserRole.MERCHANT, 'Boulangerie El Baraka — Bab El Oued');
+    const patisserie = await findOrCreate('+213557654321', UserRole.MERCHANT, 'Pâtisserie Dziriya — Hydra');
+    const superette = await findOrCreate('+213559876543', UserRole.MERCHANT, 'Superette Familia — Kouba');
+    const amina = await findOrCreate('+213550112233', UserRole.CONSUMER, 'Amina Benali');
+    const karim = await findOrCreate('+213550445566', UserRole.CONSUMER, 'Karim Medjdoub');
+    const fatima = await findOrCreate('+213550778899', UserRole.CONSUMER, 'Fatima Zohra H.');
+    const elIhsane = await findOrCreate('+213550334455', UserRole.ASSOCIATION, 'Association El Ihsane — Alger');
+    const kafil = await findOrCreate('+213550667788', UserRole.ASSOCIATION, 'Kafil El Yatim — Blida');
 
-    let consumer = await this.usersRepository.findOne({
-      where: { phone_number: '+213550000002' },
-    });
-    if (!consumer) {
-      consumer = this.usersRepository.create({
-        phone_number: '+213550000002',
-        role: UserRole.CONSUMER,
-        display_name: 'Amina B.',
-      });
-      await this.usersRepository.save(consumer);
-    }
-
-    let association = await this.usersRepository.findOne({
-      where: { role: UserRole.ASSOCIATION },
-    });
-    if (!association) {
-      association = this.usersRepository.create({
-        phone_number: '+213550000003',
-        role: UserRole.ASSOCIATION,
-        display_name: 'Association El Ihsane',
-      });
-      await this.usersRepository.save(association);
-    }
-
-    let donor = await this.usersRepository.findOne({
-      where: { phone_number: '+213550000004' },
-    });
-    if (!donor) {
-      donor = this.usersRepository.create({
-        phone_number: '+213550000004',
-        role: UserRole.CONSUMER,
-        display_name: 'Karim M.',
-      });
-      await this.usersRepository.save(donor);
-    }
-
-    // ─── 2. B2C Offers (Surprise Bags) ───
+    // ─── 2. B2C Paniers Surprise ───
     const offersData = [
       {
-        title: 'Panier Surprise Viennoiseries',
-        initial_value: 1200,
-        sale_price: 400,
-        quantity_available: 3,
-        expiry_type: ExpiryType.DLC,
-        status: OfferStatus.ACTIVE,
-        merchant_id: merchant.id,
+        title: 'Panier Viennoiseries du matin',
+        initial_value: 1200, sale_price: 400, quantity_available: 3,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.ACTIVE,
+        merchant_id: boulangerie.id,
       },
       {
-        title: 'Lot de Pains du Jour',
-        initial_value: 800,
-        sale_price: 250,
-        quantity_available: 5,
-        expiry_type: ExpiryType.DDM,
-        status: OfferStatus.ACTIVE,
-        merchant_id: merchant.id,
+        title: 'Lot de Pains Traditionnels (Khobz)',
+        initial_value: 600, sale_price: 200, quantity_available: 8,
+        expiry_type: ExpiryType.DDM, status: OfferStatus.ACTIVE,
+        merchant_id: boulangerie.id,
       },
       {
-        title: 'Assortiment Pâtisseries Orientales',
-        initial_value: 2500,
-        sale_price: 800,
-        quantity_available: 2,
-        expiry_type: ExpiryType.DLC,
-        status: OfferStatus.ACTIVE,
-        merchant_id: merchant2.id,
+        title: 'Assortiment Baklawa & Makroud',
+        initial_value: 2500, sale_price: 900, quantity_available: 2,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.ACTIVE,
+        merchant_id: patisserie.id,
       },
       {
-        title: 'Panier Fruits & Légumes',
-        initial_value: 1500,
-        sale_price: 500,
-        quantity_available: 4,
-        expiry_type: ExpiryType.DDM,
-        status: OfferStatus.ACTIVE,
-        merchant_id: merchant.id,
+        title: 'Panier Fruits & Légumes de Saison',
+        initial_value: 1800, sale_price: 600, quantity_available: 4,
+        expiry_type: ExpiryType.DDM, status: OfferStatus.ACTIVE,
+        merchant_id: superette.id,
       },
       {
-        title: 'Box Produits Laitiers',
-        initial_value: 900,
-        sale_price: 300,
-        quantity_available: 6,
-        expiry_type: ExpiryType.DLC,
-        status: OfferStatus.ACTIVE,
-        merchant_id: merchant2.id,
+        title: 'Box Produits Laitiers Soummam',
+        initial_value: 950, sale_price: 350, quantity_available: 6,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.ACTIVE,
+        merchant_id: superette.id,
       },
       {
-        title: 'Panier Épuisé (exemple)',
-        initial_value: 700,
-        sale_price: 200,
-        quantity_available: 0,
-        expiry_type: ExpiryType.DLC,
-        status: OfferStatus.SOLD_OUT,
-        merchant_id: merchant.id,
+        title: 'Msemen & Crêpes (reste du petit-déj)',
+        initial_value: 500, sale_price: 150, quantity_available: 5,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.ACTIVE,
+        merchant_id: boulangerie.id,
+      },
+      {
+        title: 'Gâteau Montécao — commande annulée',
+        initial_value: 3000, sale_price: 1000, quantity_available: 1,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.ACTIVE,
+        merchant_id: patisserie.id,
+      },
+      {
+        title: 'Panier Épuisé — Croissants',
+        initial_value: 700, sale_price: 250, quantity_available: 0,
+        expiry_type: ExpiryType.DLC, status: OfferStatus.SOLD_OUT,
+        merchant_id: boulangerie.id,
       },
     ];
 
@@ -169,132 +121,117 @@ export class DevController {
     }
     await this.offersRepository.save(offers);
 
-    // ─── 3. C2C Donations (Family Tab) ───
+    // ─── 3. C2C Dons Famille ───
     const donationsData = [
       {
-        title: 'Couscous fait maison (reste de fête)',
-        description:
-          'Il nous reste 3 grandes marmites de couscous du mariage de mon frère. Tout est frais, préparé hier soir. Venez récupérer avant 18h.',
-        neighborhood: 'Bab El Oued (Alger)',
-        donor_id: donor.id,
-        status: DonationStatus.AVAILABLE,
+        title: 'Couscous fait maison — reste du vendredi',
+        description: 'Il nous reste 2 grandes marmites de couscous au poulet du repas familial de vendredi. Tout est frais, préparé ce matin. Disponible jusqu\'à 18h.',
+        neighborhood: 'Bab El Oued (Alger)', donor_id: fatima.id, status: DonationStatus.AVAILABLE,
       },
       {
-        title: 'Fruits du jardin — figues et grenades',
-        description:
-          'Récolte abondante cette saison. Figues fraîches et grenades bien mûres. Quantité : environ 5 kg.',
-        neighborhood: 'Bir Mourad Raïs (Alger)',
-        donor_id: consumer.id,
-        status: DonationStatus.AVAILABLE,
+        title: 'Figues fraîches du jardin de Blida',
+        description: 'Récolte abondante cette saison. Figues bien mûres et sucrées. Environ 4 kg disponibles, venez avec vos sachets.',
+        neighborhood: 'Blida (Blida)', donor_id: karim.id, status: DonationStatus.AVAILABLE,
       },
       {
-        title: 'Galettes de semoule (Kesra)',
-        description:
-          'J\'ai préparé trop de kesra ce matin. 4 galettes disponibles, encore chaudes.',
-        neighborhood: 'Hussein Dey (Alger)',
-        donor_id: donor.id,
-        status: DonationStatus.AVAILABLE,
+        title: 'Kesra et Matloue — trop de pain !',
+        description: 'J\'ai fait trop de galettes ce matin pour les voisins. 6 kesra et 4 matloue disponibles. Encore chaudes !',
+        neighborhood: 'Hussein Dey (Alger)', donor_id: fatima.id, status: DonationStatus.AVAILABLE,
       },
       {
-        title: 'Lait et yaourts (date courte)',
-        description:
-          'Lait UHT et yaourts nature, date de péremption dans 2 jours. 6 bouteilles + 12 yaourts.',
-        neighborhood: 'El Harrach (Alger)',
-        donor_id: consumer.id,
-        status: DonationStatus.RESERVED,
+        title: 'Conserves et huile d\'olive',
+        description: 'Déménagement prévu. Conserves (tomate, harissa, confiture), 2 bouteilles d\'huile d\'olive de Kabylie. Tout est valide, juste besoin de place.',
+        neighborhood: 'Kouba (Alger)', donor_id: amina.id, status: DonationStatus.AVAILABLE,
       },
       {
-        title: 'Plat de Rechta (don réservé)',
-        description:
-          'Rechta algéroise préparée pour un événement annulé. Don déjà réservé par un voisin.',
-        neighborhood: 'Kouba (Alger)',
-        donor_id: donor.id,
-        status: DonationStatus.RESERVED,
+        title: 'Bourek et Garantita — restes d\'un événement',
+        description: 'Reste de la fête d\'hier : bourek aux crevettes, garantita, et salade méchouia. Le tout conditionné proprement.',
+        neighborhood: 'Bir Mourad Raïs (Alger)', donor_id: karim.id, status: DonationStatus.AVAILABLE,
+      },
+      {
+        title: 'Rechta algéroise — don déjà réservé',
+        description: 'Rechta préparée pour un événement annulé. Un voisin a déjà réservé.',
+        neighborhood: 'El Harrach (Alger)', donor_id: fatima.id, status: DonationStatus.RESERVED,
+      },
+      {
+        title: 'Lait Candia + yaourts Soummam (DLC courte)',
+        description: '4 bouteilles de lait UHT et 12 yaourts nature, date de péremption dans 2 jours.',
+        neighborhood: 'Bab Ezzouar (Alger)', donor_id: amina.id, status: DonationStatus.RESERVED,
       },
     ];
 
     for (const data of donationsData) {
-      const donation = this.donationsRepository.create(data);
-      await this.donationsRepository.save(donation);
+      await this.donationsRepository.save(this.donationsRepository.create(data));
     }
 
-    // ─── 4. B2A Institutional Donations ───
+    // ─── 4. B2A Dons Institutionnels ───
     const instDonationsData = [
       {
-        professional_id: merchant.id,
-        association_id: association.id,
-        description:
-          '50 baguettes invendues + 20 pains spéciaux. Ramassage possible entre 19h et 20h.',
-        estimated_quantity: '70 pièces (~15 kg)',
+        professional_id: boulangerie.id, association_id: elIhsane.id,
+        description: '80 baguettes et 30 pains spéciaux (complet, seigle) invendus en fin de journée. Ramassage possible entre 19h30 et 20h30 devant la boulangerie.',
+        estimated_quantity: '110 pièces (~25 kg)',
         status: InstitutionalDonationStatus.ANNOUNCED,
       },
       {
-        professional_id: merchant2.id,
-        association_id: association.id,
-        description:
-          'Surplus de gâteaux orientaux suite à commande annulée. Excellent état.',
-        estimated_quantity: '30 pièces (~8 kg)',
+        professional_id: patisserie.id, association_id: elIhsane.id,
+        description: 'Surplus de gâteaux orientaux (makroud, baklawa, samsa) suite à une commande de mariage annulée. Excellent état, tout emballé.',
+        estimated_quantity: '45 pièces (~10 kg)',
         status: InstitutionalDonationStatus.ACCEPTED,
       },
       {
-        professional_id: merchant.id,
-        association_id: association.id,
-        description:
-          'Lot de sandwichs préparés pour un événement reporté. DLC demain.',
-        estimated_quantity: '25 sandwichs (~12 kg)',
+        professional_id: superette.id, association_id: kafil.id,
+        description: 'Lot de produits frais proches de la DLC : fromage, yaourts, jus. Tous parfaitement consommables.',
+        estimated_quantity: '3 cartons (~20 kg)',
         status: InstitutionalDonationStatus.TRANSFERRED,
+      },
+      {
+        professional_id: boulangerie.id, association_id: kafil.id,
+        description: 'Don hebdomadaire de pain du dimanche. 50 baguettes disponibles à partir de 18h.',
+        estimated_quantity: '50 baguettes (~12 kg)',
+        status: InstitutionalDonationStatus.COMPLETED,
       },
     ];
 
     for (const data of instDonationsData) {
-      const instDonation = this.instDonationsRepository.create(data);
-      await this.instDonationsRepository.save(instDonation);
+      await this.instDonationsRepository.save(this.instDonationsRepository.create(data));
     }
 
-    // ─── 5. Reservations (different statuses) ───
-    const activeOffers = offers.filter(
-      (o) => o.status === OfferStatus.ACTIVE,
-    );
+    // ─── 5. Réservations (différents statuts) ───
+    const activeOffers = offers.filter(o => o.status === OfferStatus.ACTIVE);
     if (activeOffers.length >= 3) {
       const reservationsData = [
         {
-          offer_id: activeOffers[0].id,
-          consumer_id: consumer.id,
+          offer_id: activeOffers[0].id, consumer_id: amina.id,
           status: ReservationStatus.PENDING_PAYMENT,
         },
         {
-          offer_id: activeOffers[1].id,
-          consumer_id: consumer.id,
+          offer_id: activeOffers[1].id, consumer_id: karim.id,
           status: ReservationStatus.CONFIRMED,
-          payment_reference: 'MOCK-PAY-001',
-          qr_code_token: 'mock-qr-token-abc123',
+          payment_reference: 'SATIM-2026-07081423', qr_code_token: 'qr-token-abc123',
           confirmed_at: new Date(),
         },
         {
-          offer_id: activeOffers[2].id,
-          consumer_id: consumer.id,
+          offer_id: activeOffers[2].id, consumer_id: amina.id,
           status: ReservationStatus.PICKED_UP,
-          payment_reference: 'MOCK-PAY-002',
-          confirmed_at: new Date(Date.now() - 3600000),
-          picked_up_at: new Date(),
+          payment_reference: 'BARIDIMOB-2026-07081205',
+          confirmed_at: new Date(Date.now() - 3600000), picked_up_at: new Date(),
         },
       ];
 
       for (const data of reservationsData) {
-        const reservation = this.reservationsRepository.create(data);
-        await this.reservationsRepository.save(reservation);
+        await this.reservationsRepository.save(this.reservationsRepository.create(data));
       }
     }
 
     return {
       success: true,
-      message: 'Comprehensive seed completed',
+      message: 'Données de démonstration générées avec succès',
       summary: {
-        users: '5 (merchant x2, consumer x2, association x1)',
-        offers: `${offers.length} (active, sold_out)`,
-        donations: `${donationsData.length} (available, reserved)`,
-        institutional_donations: `${instDonationsData.length} (announced, accepted, transferred)`,
-        reservations: '3 (pending, confirmed, picked_up)',
+        utilisateurs: '8 (3 commerçants, 3 consommateurs, 2 associations)',
+        paniers_surprise: `${offers.length} (7 actifs, 1 épuisé)`,
+        dons_famille: `${donationsData.length} (5 disponibles, 2 réservés)`,
+        dons_institutionnels: `${instDonationsData.length} (annoncé, accepté, transféré, complété)`,
+        reservations: '3 (en attente, confirmée, récupérée)',
       },
     };
   }
