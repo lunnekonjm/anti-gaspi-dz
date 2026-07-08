@@ -28,6 +28,8 @@ async function bootstrap() {
       callback(null, true); // Allow all origins for MVP testing
     },
     credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, x-api-key, Origin',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
   // Swagger API documentation
