@@ -43,10 +43,7 @@ export class DevController {
       user = new User();
       user.phone_number = '+213000000000';
       user.role = UserRole.MERCHANT;
-      user.business_name = 'Boulangerie Test';
-      user.full_name = 'Dev Test Merchant';
-      user.latitude = 36.7525;
-      user.longitude = 3.04197;
+      user.display_name = 'Boulangerie Test';
       await this.usersRepository.save(user);
     }
 
