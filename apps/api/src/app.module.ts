@@ -134,6 +134,7 @@ import {
     DonationsModule,
     InstitutionalDonationsModule,
     SponsorshipModule,
+    DevModule,
   ],
 })
 export class AppModule {}
