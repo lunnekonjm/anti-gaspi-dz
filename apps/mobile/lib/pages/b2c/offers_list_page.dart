@@ -60,9 +60,15 @@ class _OffersListPageState extends State<OffersListPage> {
       ),
       body: offers.isLoading
           ? const ShimmerCardList()
-          : offers.offers.isEmpty
-              ? _EmptyState(l10n: l10n)
-              : RefreshIndicator(
+          : offers.error != null
+              ? _ErrorState(
+                  message: offers.error!.getMessage(auth.selectedLanguage),
+                  onRetry: () => offers.loadOffers(),
+                  l10n: l10n,
+                )
+              : offers.offers.isEmpty
+                  ? _EmptyState(l10n: l10n)
+                  : RefreshIndicator(
                   onRefresh: () => offers.loadOffers(),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -122,6 +128,45 @@ class _EmptyState extends StatelessWidget {
             l10n.comeBackLater,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  final AppLocalizations l10n;
+
+  const _ErrorState({
+    required this.message,
+    required this.onRetry,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const ExcludeSemantics(child: Text('⚠️', style: TextStyle(fontSize: 64))),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.retry),
           ),
         ],
       ),

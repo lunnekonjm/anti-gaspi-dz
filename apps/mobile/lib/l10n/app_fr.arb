@@ -90,5 +90,6 @@
   "devModeSubtitle": "Afficher les indicateurs Mock",
   "openAdminDashboard": "Ouvrir le Dashboard Admin",
   "cancel": "Annuler",
-  "mapTooltip": "Voir sur la carte"
+  "mapTooltip": "Voir sur la carte",
+  "retry": "Réessayer"
 }

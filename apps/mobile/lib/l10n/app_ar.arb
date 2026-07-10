@@ -85,5 +85,6 @@
   "devModeSubtitle": "عرض مؤشرات وهمية",
   "openAdminDashboard": "فتح لوحة تحكم المسؤول",
   "cancel": "إلغاء",
-  "mapTooltip": "عرض على الخريطة"
+  "mapTooltip": "عرض على الخريطة",
+  "retry": "إعادة المحاولة"
 }

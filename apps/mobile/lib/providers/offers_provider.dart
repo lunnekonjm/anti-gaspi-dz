@@ -7,11 +7,11 @@ class OffersProvider extends ChangeNotifier {
 
   List<dynamic> _offers = [];
   bool _isLoading = false;
-  String? _error;
+  ApiException? _error;
 
   List<dynamic> get offers => _offers;
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  ApiException? get error => _error;
 
   Future<void> loadOffers({double? lat, double? lng, double? radius}) async {
     _isLoading = true;
@@ -21,9 +21,13 @@ class OffersProvider extends ChangeNotifier {
     try {
       _offers = await _api.getOffers(lat: lat, lng: lng, radius: radius);
     } on ApiException catch (e) {
-      _error = e.messageFr;
+      _error = e;
     } catch (e) {
-      _error = 'Erreur de connexion';
+      _error = ApiException(
+        statusCode: 0,
+        messageFr: 'Erreur inattendue',
+        messageAr: 'خطأ غير متوقع',
+      );
     }
 
     _isLoading = false;
@@ -37,7 +41,7 @@ class OffersProvider extends ChangeNotifier {
       notifyListeners();
       return offer;
     } on ApiException catch (e) {
-      _error = e.messageFr;
+      _error = e;
       notifyListeners();
       return null;
     }
