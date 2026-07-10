@@ -42,6 +42,8 @@ class AntiGaspiApp extends StatelessWidget {
             title: 'Anti-Gaspi DZ',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme(auth.selectedLanguage),
+            darkTheme: AppTheme.darkTheme(auth.selectedLanguage),
+            themeMode: ThemeMode.system,
             locale: locale,
             supportedLocales: const [
               Locale('fr'),
