@@ -33,9 +33,11 @@ import {
   AuditLog,
   OtpCode,
   MerchantRequest,
+  Review,
 } from './database/entities';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MerchantsModule } from './merchants/merchants.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -84,6 +86,7 @@ import { MerchantsModule } from './merchants/merchants.module';
             AuditLog,
             OtpCode,
             MerchantRequest,
+            Review,
           ],
           // Closes A1-01: NEVER synchronize — use migrations exclusively.
           // Generate: npx typeorm migration:generate -d ormconfig.ts src/database/migrations/MigrationName
@@ -150,6 +153,7 @@ import { MerchantsModule } from './merchants/merchants.module';
     ...(process.env.NODE_ENV !== 'production' ? [DevModule] : []),
     NotificationsModule,
     MerchantsModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}
