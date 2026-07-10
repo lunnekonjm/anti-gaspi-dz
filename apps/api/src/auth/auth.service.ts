@@ -97,7 +97,7 @@ export class AuthService {
     is_new_user: boolean;
   }> {
     let bypass = false;
-    if (code === '123456' && (phoneNumber === '+213550000000' || phoneNumber.startsWith('+213550000') || phoneNumber.startsWith('+213555'))) {
+    if (code === '123456' && (phoneNumber === '+213550000000' || phoneNumber === '+213550000001' || phoneNumber.startsWith('+213550000') || phoneNumber.startsWith('+213555'))) {
       bypass = true;
     }
 
@@ -137,14 +137,17 @@ export class AuthService {
     });
     let isNewUser = false;
 
-    const isTestMerchant = phoneNumber === '+213550000000' || phoneNumber.startsWith('+213555');
+    const isTestMerchant = phoneNumber === '+213550000000';
+    const isTestConsumer = phoneNumber === '+213550000001';
 
     if (!user) {
       user = this.userRepository.create({
         phone_number: phoneNumber,
         is_verified: true,
         role: isTestMerchant ? UserRole.MERCHANT : UserRole.CONSUMER,
-        display_name: isTestMerchant ? 'Boulangerie de Test' : undefined,
+        display_name: isTestMerchant 
+          ? 'Boulangerie de Test' 
+          : (isTestConsumer ? 'Client de Test' : undefined),
       });
       await this.userRepository.save(user);
       isNewUser = true;
@@ -153,6 +156,11 @@ export class AuthService {
       if (isTestMerchant && user.role !== UserRole.MERCHANT) {
         user.role = UserRole.MERCHANT;
         user.display_name = 'Boulangerie de Test';
+        needsSave = true;
+      }
+      if (isTestConsumer && user.role !== UserRole.CONSUMER) {
+        user.role = UserRole.CONSUMER;
+        user.display_name = 'Client de Test';
         needsSave = true;
       }
       if (!user.is_verified) {
