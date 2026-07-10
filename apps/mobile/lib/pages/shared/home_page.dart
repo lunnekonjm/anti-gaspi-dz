@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../b2c/offers_list_page.dart';
 import '../c2c/donations_list_page.dart';
 import '../b2a/institutional_donations_page.dart';
+import '../sponsoring/sponsoring_page.dart';
 import 'profile_page.dart';
 
 /// Main home page with bottom navigation for all 3 segments + profile.
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage> {
     OffersListPage(),
     DonationsListPage(),
     InstitutionalDonationsPage(),
+    SponsoringPage(),
     ProfilePage(),
   ];
 
@@ -35,6 +37,7 @@ class _HomePageState extends State<HomePage> {
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         items: [
@@ -52,6 +55,11 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.business_outlined),
             activeIcon: const Icon(Icons.business),
             label: l10n.tabInstitutional,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.handshake_outlined),
+            activeIcon: const Icon(Icons.handshake),
+            label: 'Sponsor',
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.person_outline),
