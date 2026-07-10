@@ -25,3 +25,12 @@ The following secrets were previously committed to git history and **must be tre
 - **A1-10 / S2-12**: Production DB SSL now uses `rejectUnauthorized: true` — verifies server certificate
 - **S2-07**: `redeem()` now verifies calling merchant owns the offer — returns 403 if mismatched
 - **S2-08**: Transfer deed generation endpoint restricted to `MERCHANT` role via `RolesGuard`
+
+### Phase 1: Data Integrity & Architecture Hardening
+
+- **A1-02**: Database indexes added via migration — partial index on `offers(status, pickup_window_end)`, `offers(lat, lng)`, `otp_codes(phone_number, created_at)`, `donations(status, neighborhood)`, `reservations(consumer_id)`, `reservations(offer_id)`
+- **A1-03**: Haversine `orderBy` clause fully parameterized — no more raw `${lat}/${lng}` template literal interpolation
+- **A1-04**: Redis lock replaced with atomic `SET NX PX` via underlying Redis client; release uses Lua script for atomic check-and-delete; in-memory fallback preserved for single-process
+- **A1-09**: Pagination added to `findActive()` and `findByNeighborhood()` — default page size 20, hard max 100, response shape `{ data, total, page, limit }`
+- **A1-08**: Mobile `.env` removed from Flutter asset bundle; API URL now via `--dart-define=API_URL=...`; `flutter_dotenv` import/usage removed
+- **A1-13**: Debug test artifacts (`test.jpg`, `test.txt`, `test.webp`, `files/`) excluded via `.gitignore`
