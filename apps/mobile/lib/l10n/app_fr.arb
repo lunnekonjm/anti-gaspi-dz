@@ -78,5 +78,16 @@
   "deleteAccount": "Supprimer mon compte",
   "deleteAccountConfirm": "Êtes-vous sûr ? Cette action est irréversible.",
   "settings": "Paramètres",
-  "logout": "Déconnexion"
+  "logout": "Déconnexion",
+  
+  "howItWorksTitle": "Comment ça marche ?",
+  "howItWorksBody": "Réservez un panier surprise à prix réduit, payez en ligne, et récupérez-le pendant le créneau indiqué avec votre QR code.",
+  "comeBackLater": "Revenez un peu plus tard — de nouveaux paniers arrivent régulièrement 🌱",
+  "dlcVsDdmTitle": "DLC vs DDM",
+  "dlcVsDdmBody": "DLC (Date Limite de Consommation) : à consommer avant cette date, pour raisons de sécurité alimentaire.\n\nDDM (Date de Durabilité Minimale) : indicative — le produit reste bon au-delà, avec une qualité qui peut légèrement diminuer.",
+  "paymentWaitingMessage": "Une fois le paiement confirmé, votre QR code de retrait apparaîtra ici.",
+  "devModeTitle": "Mode Développeur / Admin",
+  "devModeSubtitle": "Afficher les indicateurs Mock",
+  "openAdminDashboard": "Ouvrir le Dashboard Admin",
+  "cancel": "Annuler"
 }

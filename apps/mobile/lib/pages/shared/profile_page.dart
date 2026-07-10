@@ -73,8 +73,8 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 children: [
                   SwitchListTile(
-                    title: const Text("Mode Développeur / Admin"),
-                    subtitle: const Text("Afficher les indicateurs Mock"),
+                    title: Text(l10n.devModeTitle),
+                    subtitle: Text(l10n.devModeSubtitle),
                     value: dev.isDevMode,
                     activeColor: Colors.deepOrange,
                     onChanged: (v) => dev.toggleDevMode(v),
@@ -83,7 +83,7 @@ class ProfilePage extends StatelessWidget {
                   if (dev.isDevMode)
                     ListTile(
                       leading: const Icon(Icons.admin_panel_settings, color: Colors.deepOrange),
-                      title: const Text("Ouvrir le Dashboard Admin", style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                      title: Text(l10n.openAdminDashboard, style: const TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold)),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.deepOrange),
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const DevDashboardPage()));
@@ -130,7 +130,7 @@ class ProfilePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {

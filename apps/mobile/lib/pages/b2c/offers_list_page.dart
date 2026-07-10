@@ -5,6 +5,10 @@ import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/reservations_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/info_tooltip.dart';
+import '../../widgets/shimmer_loading.dart';
+import '../../widgets/fade_slide_in.dart';
+import '../../widgets/success_burst.dart';
 import 'create_offer_page.dart';
 import 'reservation_status_page.dart';
 
@@ -17,6 +21,8 @@ class OffersListPage extends StatefulWidget {
 }
 
 class _OffersListPageState extends State<OffersListPage> {
+  bool _showBanner = true;
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +40,7 @@ class _OffersListPageState extends State<OffersListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tabSurpriseBags),
+        title: Text('🛍️  ${l10n.tabSurpriseBags}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.map_outlined),
@@ -45,33 +51,29 @@ class _OffersListPageState extends State<OffersListPage> {
         ],
       ),
       body: offers.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ShimmerCardList()
           : offers.offers.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 80,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.noOffersAvailable,
-                        style: TextStyle(color: Colors.grey.shade500),
-                      ),
-                    ],
-                  ),
-                )
+              ? _EmptyState(l10n: l10n)
               : RefreshIndicator(
                   onRefresh: () => offers.loadOffers(),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: offers.offers.length,
+                    itemCount: offers.offers.length + (_showBanner ? 1 : 0),
                     itemBuilder: (context, index) {
-                      final offer = offers.offers[index] as Map<String, dynamic>;
-                      return _OfferCard(offer: offer);
+                      if (_showBanner && index == 0) {
+                        return ExplainerBanner(
+                          emoji: '💡',
+                          title: AppLocalizations.of(context)!.howItWorksTitle,
+                          body: AppLocalizations.of(context)!.howItWorksBody,
+                          onDismiss: () => setState(() => _showBanner = false),
+                        );
+                      }
+                      final offerIndex = index - (_showBanner ? 1 : 0);
+                      final offer = offers.offers[offerIndex] as Map<String, dynamic>;
+                      return FadeSlideIn(
+                        index: offerIndex,
+                        child: _OfferCard(offer: offer),
+                      );
                     },
                   ),
                 ),
@@ -87,6 +89,34 @@ class _OffersListPageState extends State<OffersListPage> {
               label: Text(l10n.createOffer),
             )
           : null,
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _EmptyState({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('🛍️', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
+          Text(
+            l10n.noOffersAvailable,
+            style: TextStyle(color: Colors.grey.shade500),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.comeBackLater,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -114,7 +144,7 @@ class _OfferCard extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   AppTheme.primaryGreen.withValues(alpha: 0.1),
-                  Colors.white,
+                  Colors.transparent,
                 ],
               ),
             ),
@@ -131,9 +161,15 @@ class _OfferCard extends StatelessWidget {
                             ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        offer['merchant']?['display_name'] ?? '',
-                        style: TextStyle(color: Colors.grey.shade600),
+                      Row(
+                        children: [
+                          const Icon(Icons.storefront, size: 14, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            offer['merchant']?['display_name'] ?? '',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -170,24 +206,35 @@ class _OfferCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // DLC/DDM badge
+                // DLC/DDM badge with explanation
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isDLC ? AppTheme.dlcRed.withValues(alpha: 0.1) : AppTheme.ddmAmber.withValues(alpha: 0.1),
+                    color: isDLC
+                        ? AppTheme.dlcRed.withValues(alpha: 0.1)
+                        : AppTheme.ddmAmber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDLC ? AppTheme.dlcRed : AppTheme.ddmAmber,
-                    ),
+                    border: Border.all(color: isDLC ? AppTheme.dlcRed : AppTheme.ddmAmber),
                   ),
-                  child: Text(
-                    expiryType,
-                    style: TextStyle(
-                      color: isDLC ? AppTheme.dlcRed : AppTheme.ddmAmber,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(isDLC ? '⏰' : '📅', style: const TextStyle(fontSize: 12)),
+                      const SizedBox(width: 4),
+                      Text(
+                        expiryType,
+                        style: TextStyle(
+                          color: isDLC ? AppTheme.dlcRed : AppTheme.ddmAmber,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                InfoTooltip(
+                  title: l10n.dlcVsDdmTitle,
+                  body: l10n.dlcVsDdmBody,
                 ),
               ],
             ),
@@ -200,12 +247,15 @@ class _OfferCard extends StatelessWidget {
                 final provider = context.read<ReservationsProvider>();
                 final reservation = await provider.createReservation(offer['id']);
                 if (reservation != null && context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReservationStatusPage(reservation: reservation),
-                    ),
-                  );
+                  await showSuccessBurst(context, message: '🎉 Réservation confirmée !');
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReservationStatusPage(reservation: reservation),
+                      ),
+                    );
+                  }
                 }
               },
               icon: const Icon(Icons.shopping_cart),
