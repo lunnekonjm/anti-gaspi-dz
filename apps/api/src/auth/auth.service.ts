@@ -138,7 +138,7 @@ export class AuthService {
     let isNewUser = false;
 
     const isTestMerchant = phoneNumber === '+213550000000';
-    const isTestConsumer = phoneNumber === '+213550000001';
+    const isTestConsumer = phoneNumber === '+213555123456';
 
     if (!user) {
       user = this.userRepository.create({
