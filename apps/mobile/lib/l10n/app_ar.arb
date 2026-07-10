@@ -84,5 +84,6 @@
   "devModeTitle": "وضع المطور / المسؤول",
   "devModeSubtitle": "عرض مؤشرات وهمية",
   "openAdminDashboard": "فتح لوحة تحكم المسؤول",
-  "cancel": "إلغاء"
+  "cancel": "إلغاء",
+  "mapTooltip": "عرض على الخريطة"
 }

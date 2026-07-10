@@ -89,5 +89,6 @@
   "devModeTitle": "Mode Développeur / Admin",
   "devModeSubtitle": "Afficher les indicateurs Mock",
   "openAdminDashboard": "Ouvrir le Dashboard Admin",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+  "mapTooltip": "Voir sur la carte"
 }

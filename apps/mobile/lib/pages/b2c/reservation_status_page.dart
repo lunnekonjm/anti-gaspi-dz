@@ -33,7 +33,7 @@ class _ReservationStatusPageState extends State<ReservationStatusPage> {
           children: [
             const Spacer(),
             if (status == 'confirmed' && token != null) ...[
-              const Text('🎉', style: TextStyle(fontSize: 64)),
+              const ExcludeSemantics(child: Text('🎉', style: TextStyle(fontSize: 64))),
               const SizedBox(height: 8),
               Text(
                 l10n.reservationConfirmed,
@@ -102,7 +102,7 @@ class _ReservationStatusPageState extends State<ReservationStatusPage> {
                 ),
               ],
             ] else ...[
-              const Text('💳', style: TextStyle(fontSize: 64)),
+              const ExcludeSemantics(child: Text('💳', style: TextStyle(fontSize: 64))),
               const SizedBox(height: 8),
               Text(
                 l10n.payNow,

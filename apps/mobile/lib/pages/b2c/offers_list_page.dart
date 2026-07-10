@@ -40,9 +40,16 @@ class _OffersListPageState extends State<OffersListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('🛍️  ${l10n.tabSurpriseBags}'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ExcludeSemantics(child: Text('🛍️  ')),
+            Text(l10n.tabSurpriseBags),
+          ],
+        ),
         actions: [
           IconButton(
+            tooltip: l10n.mapTooltip,
             icon: const Icon(Icons.map_outlined),
             onPressed: () {
               // TODO: Navigate to map view
@@ -103,7 +110,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('🛍️', style: TextStyle(fontSize: 64)),
+          const ExcludeSemantics(child: Text('🛍️', style: TextStyle(fontSize: 64))),
           const SizedBox(height: 16),
           Text(
             l10n.noOffersAvailable,
@@ -219,7 +226,7 @@ class _OfferCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(isDLC ? '⏰' : '📅', style: const TextStyle(fontSize: 12)),
+                      ExcludeSemantics(child: Text(isDLC ? '⏰' : '📅', style: const TextStyle(fontSize: 12))),
                       const SizedBox(width: 4),
                       Text(
                         expiryType,
