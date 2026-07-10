@@ -59,13 +59,20 @@ export class OffersService {
 
   /**
    * Get active offers, optionally filtered by geolocation.
-   * Uses Haversine formula for distance calculation.
+   * Closes A1-09: Paginated with hard max of 100 per page.
    */
   async findActive(
     lat?: number,
     lng?: number,
     radiusKm?: number,
-  ): Promise<Offer[]> {
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<{ data: Offer[]; total: number; page: number; limit: number }> {
+    // Enforce hard max
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safePage = Math.max(page, 1);
+    const offset = (safePage - 1) * safeLimit;
+
     const queryBuilder = this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.merchant', 'merchant')
@@ -82,7 +89,6 @@ export class OffersService {
         ))`;
       queryBuilder
         .andWhere(`${haversine} <= :radius`, { lat, lng, radius: radiusKm })
-        // Closes A1-03: Use addSelect + setParameter instead of raw interpolation
         .addSelect(haversine, 'offer_distance')
         .setParameter('lat', lat)
         .setParameter('lng', lng)
@@ -91,7 +97,12 @@ export class OffersService {
       queryBuilder.orderBy('offer.created_at', 'DESC');
     }
 
-    return queryBuilder.getMany();
+    const [data, total] = await queryBuilder
+      .skip(offset)
+      .take(safeLimit)
+      .getManyAndCount();
+
+    return { data, total, page: safePage, limit: safeLimit };
   }
 
   async findById(id: string): Promise<Offer | null> {

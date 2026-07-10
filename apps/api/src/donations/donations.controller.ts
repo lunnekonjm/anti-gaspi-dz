@@ -35,8 +35,16 @@ export class DonationsController {
     summary:
       'List available donations by neighborhood / قائمة التبرعات حسب الحي',
   })
-  async findAll(@Query('neighborhood') neighborhood?: string) {
-    return this.donationsService.findByNeighborhood(neighborhood);
+  async findAll(
+    @Query('neighborhood') neighborhood?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.donationsService.findByNeighborhood(
+      neighborhood,
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 20,
+    );
   }
 
   @Get('communes')

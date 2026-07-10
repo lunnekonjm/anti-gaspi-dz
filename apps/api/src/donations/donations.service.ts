@@ -47,15 +47,30 @@ export class DonationsService {
     return this.donationRepository.save(donation);
   }
 
-  async findByNeighborhood(neighborhood?: string): Promise<Donation[]> {
+  /**
+   * Closes A1-09: Paginated with hard max of 100 per page.
+   */
+  async findByNeighborhood(
+    neighborhood?: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<{ data: Donation[]; total: number; page: number; limit: number }> {
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safePage = Math.max(page, 1);
+    const offset = (safePage - 1) * safeLimit;
+
     const where: Record<string, any> = { status: 'available' };
     if (neighborhood) {
       where.neighborhood = neighborhood;
     }
-    return this.donationRepository.find({
+    const [data, total] = await this.donationRepository.findAndCount({
       where,
       order: { created_at: 'DESC' },
+      skip: offset,
+      take: safeLimit,
     });
+
+    return { data, total, page: safePage, limit: safeLimit };
   }
 
   async findById(id: string): Promise<Donation | null> {

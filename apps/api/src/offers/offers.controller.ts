@@ -41,15 +41,21 @@ export class OffersController {
     type: Number,
     description: 'Radius in km',
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 20, max: 100)' })
   async findActive(
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('radius') radius?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     return this.offersService.findActive(
       lat ? parseFloat(lat) : undefined,
       lng ? parseFloat(lng) : undefined,
       radius ? parseFloat(radius) : undefined,
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 20,
     );
   }
 
