@@ -1,4 +1,4 @@
-import { IsUUID, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsUUID, IsEnum, IsOptional, IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PaymentProvider } from '../../common/enums';
 
@@ -30,11 +30,12 @@ export class PaymentWebhookDto {
   @IsString()
   status: string;
 
+  // Closes S2-05: Webhook signature is now MANDATORY
   @ApiProperty({
-    description: 'Webhook signature for verification',
-    required: false,
+    description: 'Webhook signature for verification (required)',
+    required: true,
   })
-  @IsOptional()
   @IsString()
-  signature?: string;
+  @IsNotEmpty()
+  signature: string;
 }

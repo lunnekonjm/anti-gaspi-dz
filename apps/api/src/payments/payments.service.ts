@@ -71,26 +71,34 @@ export class PaymentsService {
 
   /**
    * Handle PSP webhook callback.
-   * Confirms reservation and generates QR code token.
+   * Closes S2-05: Webhook signature is now MANDATORY — no bypass.
    */
   async handleWebhook(dto: PaymentWebhookDto) {
-    // Verify webhook signature (provider-specific)
-    // In production, verify SATIM/BaridiMob signature
-    if (dto.signature) {
-      const isValid = this.mockPaymentProvider.verifyWebhookSignature(
-        dto as any,
-        dto.signature,
+    // Signature is mandatory — reject unsigned webhook calls
+    if (!dto.signature) {
+      throw new HttpException(
+        {
+          message_fr: 'Signature webhook manquante.',
+          message_ar: 'توقيع webhook مفقود.',
+          error: 'Unauthorized',
+        },
+        HttpStatus.UNAUTHORIZED,
       );
-      if (!isValid) {
-        throw new HttpException(
-          {
-            message_fr: 'Signature webhook invalide.',
-            message_ar: 'توقيع webhook غير صالح.',
-            error: 'Unauthorized',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
+    }
+
+    const isValid = this.mockPaymentProvider.verifyWebhookSignature(
+      dto as any,
+      dto.signature,
+    );
+    if (!isValid) {
+      throw new HttpException(
+        {
+          message_fr: 'Signature webhook invalide.',
+          message_ar: 'توقيع webhook غير صالح.',
+          error: 'Unauthorized',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     if (dto.status === 'success') {
@@ -108,18 +116,32 @@ export class PaymentsService {
   }
 
   /**
-   * Mock endpoint: simulate payment completion (dev only).
+   * Mock endpoint: simulate payment completion.
+   * Closes S2-06: Blocked in production — only available in development.
    */
   async simulateMockPayment(paymentReference: string, reservationId: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new HttpException(
+        {
+          message_fr: 'Endpoint non disponible en production.',
+          message_ar: 'نقطة النهاية غير متاحة في الإنتاج.',
+          error: 'Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     const result =
       await this.mockPaymentProvider.simulatePaymentCompletion(
         paymentReference,
       );
 
+    // In dev, bypass signature check by providing a mock signature
     return this.handleWebhook({
       payment_reference: result.payment_reference,
       reservation_id: reservationId,
       status: result.status,
+      signature: 'mock-dev-signature',
     });
   }
 }
