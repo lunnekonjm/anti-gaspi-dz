@@ -38,6 +38,7 @@ import {
 import { NotificationsModule } from './notifications/notifications.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -154,6 +155,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     NotificationsModule,
     MerchantsModule,
     ReviewsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

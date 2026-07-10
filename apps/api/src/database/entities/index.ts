@@ -3,7 +3,7 @@ export { Offer } from './offer.entity';
 export { Reservation } from './reservation.entity';
 export { Donation } from './donation.entity';
 export { Message } from './message.entity';
-export { Report } from './report.entity';
+export { Report, ReportStatus } from './report.entity';
 export { InstitutionalDonation } from './institutional-donation.entity';
 export { TransferDeed } from './transfer-deed.entity';
 export { SponsorCampaign } from './sponsor-campaign.entity';
