@@ -5,6 +5,7 @@ import { Repository, MoreThan } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User, OtpCode } from '../database/entities';
 import { SmsService } from './sms.service';
+import { UserRole } from '../common/enums';
 
 @Injectable()
 export class AuthService {
@@ -136,16 +137,29 @@ export class AuthService {
     });
     let isNewUser = false;
 
+    const isTestMerchant = phoneNumber === '+213550000000' || phoneNumber.startsWith('+213555');
+
     if (!user) {
       user = this.userRepository.create({
         phone_number: phoneNumber,
         is_verified: true,
+        role: isTestMerchant ? UserRole.MERCHANT : UserRole.CONSUMER,
+        display_name: isTestMerchant ? 'Boulangerie de Test' : undefined,
       });
       await this.userRepository.save(user);
       isNewUser = true;
     } else {
+      let needsSave = false;
+      if (isTestMerchant && user.role !== UserRole.MERCHANT) {
+        user.role = UserRole.MERCHANT;
+        user.display_name = 'Boulangerie de Test';
+        needsSave = true;
+      }
       if (!user.is_verified) {
         user.is_verified = true;
+        needsSave = true;
+      }
+      if (needsSave) {
         await this.userRepository.save(user);
       }
     }
