@@ -63,7 +63,7 @@ class AuthProvider extends ChangeNotifier {
       if (e is ApiException) {
         _errorMessage = e.getMessage(_selectedLanguage);
       } else {
-        _errorMessage = _selectedLanguage == 'ar' ? 'خطأ في الاتصال بالخادم (Le serveur démarre peut-être...)' : 'Erreur de connexion (Le serveur démarre peut-être...)';
+        _errorMessage = _selectedLanguage == 'ar' ? 'حدث خطأ غير متوقع' : 'Une erreur inattendue est survenue';
       }
       _isLoading = false;
       notifyListeners();

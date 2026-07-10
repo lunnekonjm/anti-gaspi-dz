@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -141,22 +143,34 @@ class ApiService {
 
   // --- HTTP helpers ---
   Future<Map<String, dynamic>> _get(String path) async {
-    final response = await http.get(
-      Uri.parse('$_baseUrl$path'),
-      headers: await _headers(),
-    );
-    return _handleResponse(response);
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl$path'),
+        headers: await _headers(),
+      ).timeout(const Duration(seconds: 60));
+      return _handleResponse(response);
+    } on SocketException {
+      throw _offlineError();
+    } on TimeoutException {
+      throw _timeoutError();
+    }
   }
 
   Future<List<dynamic>> _getList(String path) async {
-    final response = await http.get(
-      Uri.parse('$_baseUrl$path'),
-      headers: await _headers(),
-    );
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return json.decode(response.body) as List<dynamic>;
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl$path'),
+        headers: await _headers(),
+      ).timeout(const Duration(seconds: 60));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return json.decode(response.body) as List<dynamic>;
+      }
+      throw _parseError(response);
+    } on SocketException {
+      throw _offlineError();
+    } on TimeoutException {
+      throw _timeoutError();
     }
-    throw _parseError(response);
   }
 
   Future<Map<String, dynamic>> _post(
@@ -164,21 +178,33 @@ class ApiService {
     Map<String, dynamic> body, {
     bool auth = true,
   }) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl$path'),
-      headers: await _headers(auth: auth),
-      body: json.encode(body),
-    );
-    return _handleResponse(response);
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl$path'),
+        headers: await _headers(auth: auth),
+        body: json.encode(body),
+      ).timeout(const Duration(seconds: 60));
+      return _handleResponse(response);
+    } on SocketException {
+      throw _offlineError();
+    } on TimeoutException {
+      throw _timeoutError();
+    }
   }
 
   Future<void> _delete(String path) async {
-    final response = await http.delete(
-      Uri.parse('$_baseUrl$path'),
-      headers: await _headers(),
-    );
-    if (response.statusCode >= 300) {
-      throw _parseError(response);
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl$path'),
+        headers: await _headers(),
+      ).timeout(const Duration(seconds: 60));
+      if (response.statusCode >= 300) {
+        throw _parseError(response);
+      }
+    } on SocketException {
+      throw _offlineError();
+    } on TimeoutException {
+      throw _timeoutError();
     }
   }
 
@@ -201,10 +227,26 @@ class ApiService {
     } catch (_) {
       return ApiException(
         statusCode: response.statusCode,
-        messageFr: 'Erreur de connexion',
-        messageAr: 'خطأ في الاتصال',
+        messageFr: 'Erreur serveur',
+        messageAr: 'خطأ في الخادم',
       );
     }
+  }
+
+  ApiException _offlineError() {
+    return ApiException(
+      statusCode: 0,
+      messageFr: 'Aucune connexion Internet',
+      messageAr: 'لا يوجد اتصال بالإنترنت',
+    );
+  }
+
+  ApiException _timeoutError() {
+    return ApiException(
+      statusCode: 408,
+      messageFr: 'Le serveur met trop de temps à répondre (il démarre peut-être).',
+      messageAr: 'يستغرق الخادم وقتًا طويلاً للرد (قد يكون قيد بدء التشغيل).',
+    );
   }
 }
 
