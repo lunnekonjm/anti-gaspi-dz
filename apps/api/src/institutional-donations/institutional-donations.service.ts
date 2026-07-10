@@ -206,10 +206,11 @@ export class InstitutionalDonationsService {
     });
   }
 
+  // Closes P3-04: phone_number removed — personal data not exposed in directory
   async getAssociations(): Promise<User[]> {
     return this.userRepository.find({
       where: { role: UserRole.ASSOCIATION },
-      select: { id: true, display_name: true, phone_number: true },
+      select: { id: true, display_name: true },
     });
   }
 
