@@ -54,7 +54,9 @@ export class InstitutionalDonationsController {
   }
 
   @Post(':id/transfer')
-  @UseGuards(AuthGuard('jwt'))
+  // Closes S2-08: Restrict transfer deed generation to MERCHANT role
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.MERCHANT)
   @UseInterceptors(AuditLogInterceptor)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
