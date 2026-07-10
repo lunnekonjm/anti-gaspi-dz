@@ -113,8 +113,8 @@ class ApiService {
   }
 
   Future<List<String>> getCommunes() async {
-    final response = await _get('/donations/communes');
-    return (response as List).cast<String>();
+    final response = await _getList('/donations/communes');
+    return response.cast<String>();
   }
 
   // --- Institutional Donations (B2A) ---
