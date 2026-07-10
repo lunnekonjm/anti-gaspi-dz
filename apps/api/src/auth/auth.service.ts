@@ -64,10 +64,12 @@ export class AuthService {
     const code = this.generateOtpCode();
     const expiresAt = new Date(Date.now() + this.otpExpiryMinutes * 60 * 1000);
 
-    // Save OTP
+    // Save OTP — hash before storage (Closes S2-14)
+    const { createHash } = require('crypto');
+    const hashedCode = createHash('sha256').update(code).digest('hex');
     const otp = this.otpRepository.create({
       phone_number: phoneNumber,
-      code,
+      code: hashedCode,
       expires_at: expiresAt,
     });
     await this.otpRepository.save(otp);
@@ -93,11 +95,13 @@ export class AuthService {
     user: Partial<User>;
     is_new_user: boolean;
   }> {
-    // Find valid OTP
+    // Find valid OTP — hash the submitted code for comparison (Closes S2-14)
+    const { createHash } = require('crypto');
+    const hashedCode = createHash('sha256').update(code).digest('hex');
     const otp = await this.otpRepository.findOne({
       where: {
         phone_number: phoneNumber,
-        code,
+        code: hashedCode,
         is_used: false,
         expires_at: MoreThan(new Date()),
       },

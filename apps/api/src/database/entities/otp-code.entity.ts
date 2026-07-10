@@ -17,7 +17,8 @@ export class OtpCode {
   @Column({ type: 'varchar', length: 20 })
   phone_number: string;
 
-  @Column({ type: 'varchar', length: 10 })
+  // Closes S2-14: Stores SHA-256 hash, not plaintext OTP
+  @Column({ type: 'varchar', length: 64 })
   code: string;
 
   @Column({ type: 'timestamp' })
