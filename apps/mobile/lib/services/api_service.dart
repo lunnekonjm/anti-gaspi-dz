@@ -136,6 +136,11 @@ class ApiService {
     return _getList('/institutional-donations/associations');
   }
 
+  // --- FCM Token ---
+  Future<void> updateFcmToken(String token) async {
+    await _put('/users/me/fcm-token', {'fcm_token': token});
+  }
+
   // --- Logout ---
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../services/api_service.dart';
 
 /// Auth state management via Provider (ChangeNotifier).
@@ -36,6 +37,18 @@ class AuthProvider extends ChangeNotifier {
         _user = await _api.getProfile();
         _isAuthenticated = true;
         _selectedLanguage = _user?['language_preference'] ?? lang;
+        
+        try {
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await _api.updateFcmToken(fcmToken);
+          }
+          if (_user?['consent_notifications'] == true) {
+            await FirebaseMessaging.instance.subscribeToTopic('new_offers');
+          } else {
+            await FirebaseMessaging.instance.unsubscribeFromTopic('new_offers');
+          }
+        } catch (_) {}
       } catch (_) {
         await _storage.delete(key: 'jwt_token');
       }
@@ -109,6 +122,15 @@ class AuthProvider extends ChangeNotifier {
     _user?['consent_payment'] = payment;
     _user?['consent_geolocation'] = geolocation;
     _user?['consent_notifications'] = notifications;
+
+    try {
+      if (notifications) {
+        await FirebaseMessaging.instance.subscribeToTopic('new_offers');
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('new_offers');
+      }
+    } catch (_) {}
+
     notifyListeners();
   }
 
