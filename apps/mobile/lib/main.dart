@@ -38,30 +38,24 @@ class AntiGaspiApp extends StatelessWidget {
       child: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           final locale = Locale(auth.selectedLanguage);
-          return Directionality(
-            // Explicit RTL/LTR based on language selection
-            textDirection: auth.selectedLanguage == 'ar'
-                ? TextDirection.rtl
-                : TextDirection.ltr,
-            child: MaterialApp(
-              title: 'Anti-Gaspi DZ',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme(auth.selectedLanguage),
-              locale: locale,
-              supportedLocales: const [
-                Locale('fr'),
-                Locale('ar'),
-              ],
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              home: auth.isAuthenticated
-                  ? const HomePage()
-                  : const LoginPage(),
-            ),
+          return MaterialApp(
+            title: 'Anti-Gaspi DZ',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme(auth.selectedLanguage),
+            locale: locale,
+            supportedLocales: const [
+              Locale('fr'),
+              Locale('ar'),
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: auth.isAuthenticated
+                ? const HomePage()
+                : const LoginPage(),
           );
         },
       ),
