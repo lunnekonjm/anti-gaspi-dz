@@ -74,23 +74,19 @@ export class OffersService {
       .andWhere('offer.pickup_window_end > :now', { now: new Date() });
 
     if (lat && lng && radiusKm) {
-      // Haversine formula for distance filtering
-      queryBuilder.andWhere(
-        `(6371 * acos(
+      // Haversine formula for distance filtering (parameterized)
+      const haversine = `(6371 * acos(
           cos(radians(:lat)) * cos(radians(offer.latitude)) *
           cos(radians(offer.longitude) - radians(:lng)) +
           sin(radians(:lat)) * sin(radians(offer.latitude))
-        )) <= :radius`,
-        { lat, lng, radius: radiusKm },
-      );
-      queryBuilder.orderBy(
-        `(6371 * acos(
-          cos(radians(${lat})) * cos(radians(offer.latitude)) *
-          cos(radians(offer.longitude) - radians(${lng})) +
-          sin(radians(${lat})) * sin(radians(offer.latitude))
-        ))`,
-        'ASC',
-      );
+        ))`;
+      queryBuilder
+        .andWhere(`${haversine} <= :radius`, { lat, lng, radius: radiusKm })
+        // Closes A1-03: Use addSelect + setParameter instead of raw interpolation
+        .addSelect(haversine, 'offer_distance')
+        .setParameter('lat', lat)
+        .setParameter('lng', lng)
+        .orderBy('offer_distance', 'ASC');
     } else {
       queryBuilder.orderBy('offer.created_at', 'DESC');
     }
