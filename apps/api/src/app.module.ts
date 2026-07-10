@@ -53,7 +53,9 @@ import {
           ...(url
             ? {
                 url,
-                ssl: isProd ? { rejectUnauthorized: false } : false,
+                // Closes A1-10 / S2-12: Verify SSL certificates in production.
+                // If connection fails, add Render's CA cert via NODE_EXTRA_CA_CERTS env var.
+                ssl: isProd ? { rejectUnauthorized: true } : false,
               }
             : {
                 host: configService.get<string>('DATABASE_HOST', 'localhost'),
