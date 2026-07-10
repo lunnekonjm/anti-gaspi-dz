@@ -1,0 +1,20 @@
+# Root .gitignore — defense-in-depth
+# Closes S2-03: Prevent any .env file from being tracked
+
+# Environment files (any directory)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Debug artifacts
+*.log
