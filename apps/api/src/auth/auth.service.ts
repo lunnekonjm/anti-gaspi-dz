@@ -163,17 +163,14 @@ export class AuthService {
     };
   }
 
+  /**
+   * Generate a cryptographically random OTP code.
+   * Closes S2-02: Never returns a hardcoded value in any environment.
+   */
   private generateOtpCode(): string {
-    // In development (mocked SMS), always use 123456 to make testing easy
-    if (process.env.SMS_PROVIDER === 'console' || !process.env.SMS_PROVIDER) {
-      return '123456';
-    }
-
-    const digits = '0123456789';
-    let code = '';
-    for (let i = 0; i < this.otpLength; i++) {
-      code += digits.charAt(Math.floor(Math.random() * digits.length));
-    }
-    return code;
+    const { randomInt } = require('crypto');
+    const min = Math.pow(10, this.otpLength - 1); // 100000 for 6-digit
+    const max = Math.pow(10, this.otpLength);       // 1000000 for 6-digit
+    return randomInt(min, max).toString();
   }
 }
