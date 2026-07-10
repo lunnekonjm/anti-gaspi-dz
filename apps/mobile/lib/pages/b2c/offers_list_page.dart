@@ -12,6 +12,7 @@ import '../../widgets/fade_slide_in.dart';
 import '../../widgets/success_burst.dart';
 import 'create_offer_page.dart';
 import 'reservation_status_page.dart';
+import 'offers_map_page.dart';
 
 /// B2C Offers list page — shows surprise bags with prices and pickup windows.
 class OffersListPage extends StatefulWidget {
@@ -53,7 +54,10 @@ class _OffersListPageState extends State<OffersListPage> {
             tooltip: l10n.mapTooltip,
             icon: const Icon(Icons.map_outlined),
             onPressed: () {
-              // TODO: Navigate to map view
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OffersMapPage()),
+              );
             },
           ),
         ],
