@@ -18,3 +18,9 @@ Thumbs.db
 
 # Debug artifacts
 *.log
+
+# Closes A1-13: Debug test files at repo root
+/test.jpg
+/test.txt
+/test.webp
+/files/
