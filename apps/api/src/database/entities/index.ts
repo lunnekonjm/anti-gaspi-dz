@@ -10,3 +10,4 @@ export { SponsorCampaign } from './sponsor-campaign.entity';
 export { PricingConfig } from './pricing-config.entity';
 export { AuditLog } from './audit-log.entity';
 export { OtpCode } from './otp-code.entity';
+export { MerchantRequest, MerchantRequestStatus } from './merchant-request.entity';

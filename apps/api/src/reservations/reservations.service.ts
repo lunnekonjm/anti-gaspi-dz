@@ -134,7 +134,7 @@ export class ReservationsService {
   ): Promise<Reservation> {
     const reservation = await this.reservationRepository.findOne({
       where: { id: reservationId },
-      relations: ['consumer', 'offer', 'offer.merchant'],
+      relations: { consumer: true, offer: { merchant: true } },
     });
 
     if (!reservation) {
