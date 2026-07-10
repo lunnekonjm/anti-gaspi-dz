@@ -22,13 +22,21 @@ async function bootstrap() {
   // Bilingual exception filter (FR + AR responses)
   app.useGlobalFilters(new BilingualExceptionFilter());
 
-  // CORS
+  // CORS — Closes A1-07 / S2-10: explicit origin allow-list instead of wildcard
+  const allowedOrigins = (configService.get<string>('CORS_ORIGINS') || 'http://localhost:3000,http://localhost:8080')
+    .split(',')
+    .map((o: string) => o.trim());
   app.enableCors({
-    origin: (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
-      callback(null, true); // Allow all origins for MVP testing
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
     },
-    credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, x-api-key, Origin',
+    credentials: false, // App uses Bearer tokens, not cookies
+    allowedHeaders: 'Content-Type, Accept, Authorization',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
