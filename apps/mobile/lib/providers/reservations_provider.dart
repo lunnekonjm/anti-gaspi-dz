@@ -25,6 +25,18 @@ class ReservationsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadMerchantReservations() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _reservations = await _api.getMerchantReservations();
+    } on ApiException catch (e) {
+      _error = e.messageFr;
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<Map<String, dynamic>?> createReservation(String offerId) async {
     try {
       final reservation = await _api.createReservation(offerId);

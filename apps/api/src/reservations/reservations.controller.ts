@@ -72,4 +72,15 @@ export class ReservationsController {
   async findMine(@CurrentUser() user: User) {
     return this.reservationsService.findByConsumer(user.id);
   }
+
+  @Get('merchant')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.MERCHANT)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get merchant reservations (Admin/Merchant only)',
+  })
+  async findForMerchant(@CurrentUser() user: User) {
+    return this.reservationsService.findByMerchant(user.id);
+  }
 }

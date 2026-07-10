@@ -92,6 +92,8 @@ class ApiService {
 
   Future<List<dynamic>> getMyReservations() async => _getList('/reservations/mine');
 
+  Future<List<dynamic>> getMerchantReservations() async => _getList('/reservations/merchant');
+
   // --- Donations (C2C) ---
   Future<List<dynamic>> getDonations({String? neighborhood}) async {
     final query = neighborhood != null ? '?neighborhood=$neighborhood' : '';

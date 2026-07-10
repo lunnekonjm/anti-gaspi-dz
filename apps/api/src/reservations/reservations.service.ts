@@ -324,6 +324,14 @@ export class ReservationsService {
     });
   }
 
+  async findByMerchant(merchantId: string): Promise<Reservation[]> {
+    return this.reservationRepository.find({
+      where: { offer: { merchant_id: merchantId } },
+      relations: { offer: true, consumer: true },
+      order: { reserved_at: 'DESC' },
+    });
+  }
+
   /**
    * No-show detection — auto-marks confirmed reservations as no_show
    * if pickup window has expired. Runs every 10 minutes.

@@ -4,6 +4,7 @@ import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/dev_provider.dart';
 import '../dev_dashboard_page.dart';
+import '../b2b/merchant_dashboard_page.dart';
 
 /// Profile page with settings, language toggle, account deletion.
 class ProfilePage extends StatelessWidget {
@@ -94,6 +95,20 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+
+          if (user?['role'] == 'merchant')
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.storefront, color: Colors.blue),
+                title: const Text('Tableau de bord commerçant', style: TextStyle(fontWeight: FontWeight.bold)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MerchantDashboardPage()));
+                },
+              ),
+            ),
+          if (user?['role'] == 'merchant')
+            const SizedBox(height: 8),
 
           // Logout
           Card(
