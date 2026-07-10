@@ -15,13 +15,24 @@ import { User, OtpCode } from '../database/entities';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'default-secret',
-        signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRATION', '7d') ||
-            '7d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        // Closes S2-04: Fail-fast if JWT_SECRET is not set — no silent fallback
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret) {
+          throw new Error(
+            'FATAL: JWT_SECRET environment variable is not set. ' +
+            'The application cannot start without it. ' +
+            'Generate one with: openssl rand -hex 32',
+          );
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: (configService.get<string>('JWT_EXPIRATION', '7d') ||
+              '7d') as any,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

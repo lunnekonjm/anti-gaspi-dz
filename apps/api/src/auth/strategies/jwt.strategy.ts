@@ -13,10 +13,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {
+    // Closes S2-04: Fail-fast if JWT_SECRET is not set — no silent fallback
+    const secret = configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error(
+        'FATAL: JWT_SECRET environment variable is not set. ' +
+        'The application cannot start without it.',
+      );
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'default-secret',
+      secretOrKey: secret,
     });
   }
 
