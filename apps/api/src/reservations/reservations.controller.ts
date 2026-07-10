@@ -46,8 +46,9 @@ export class ReservationsController {
     summary:
       'Redeem reservation via QR scan (merchant) / تأكيد الاستلام عبر مسح QR (التاجر)',
   })
-  async redeem(@Param('id') id: string, @Body() dto: RedeemReservationDto) {
-    return this.reservationsService.redeem(id, dto.qr_code_token);
+  // Closes S2-07: Merchant-ownership verification on redeem
+  async redeem(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: RedeemReservationDto) {
+    return this.reservationsService.redeem(id, dto.qr_code_token, user.id);
   }
 
   @Post(':id/cancel')

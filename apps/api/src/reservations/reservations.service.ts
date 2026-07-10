@@ -165,11 +165,13 @@ export class ReservationsService {
 
   /**
    * Redeem reservation — merchant scans QR code.
+   * Closes S2-07: Verifies merchant owns the offer being redeemed.
    * Token verified server-side, single use only.
    */
-  async redeem(reservationId: string, qrToken: string): Promise<Reservation> {
+  async redeem(reservationId: string, qrToken: string, merchantId: string): Promise<Reservation> {
     const reservation = await this.reservationRepository.findOne({
       where: { id: reservationId },
+      relations: { offer: true },
     });
 
     if (!reservation) {
@@ -180,6 +182,18 @@ export class ReservationsService {
           error: 'Not Found',
         },
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Verify the calling merchant owns this offer
+    if (reservation.offer.merchant_id !== merchantId) {
+      throw new HttpException(
+        {
+          message_fr: 'Vous ne pouvez valider que les réservations de vos propres offres.',
+          message_ar: 'يمكنك فقط التحقق من حجوزات عروضك الخاصة.',
+          error: 'Forbidden',
+        },
+        HttpStatus.FORBIDDEN,
       );
     }
 
