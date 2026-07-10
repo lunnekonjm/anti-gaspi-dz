@@ -64,6 +64,19 @@ export class UsersController {
     return this.usersService.updateProfile(user.id, dto);
   }
 
+  @Put('me/fcm-token')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update FCM push token / تحديث رمز FCM' })
+  async updateFcmToken(
+    @CurrentUser() user: User,
+    @Body() dto: import('./dto').UpdateFcmTokenDto,
+  ) {
+    await this.usersService.updateFcmToken(user.id, dto.fcm_token);
+    return { status: 'success' };
+  }
+
   @Delete('me')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

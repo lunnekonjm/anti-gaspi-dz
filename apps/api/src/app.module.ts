@@ -33,6 +33,7 @@ import {
   AuditLog,
   OtpCode,
 } from './database/entities';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -144,6 +145,7 @@ import {
     // DevModule only loaded in non-production — routes don't exist at all in prod (404)
     // Closes S2-01 / A1-11
     ...(process.env.NODE_ENV !== 'production' ? [DevModule] : []),
+    NotificationsModule,
   ],
 })
 export class AppModule {}

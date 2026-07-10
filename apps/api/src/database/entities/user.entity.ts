@@ -45,6 +45,9 @@ export class User {
   @Column({ type: 'boolean', default: false })
   is_verified: boolean;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  fcm_token: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 

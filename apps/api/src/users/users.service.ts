@@ -36,6 +36,11 @@ export class UsersService {
     return this.userRepository.findOneOrFail({ where: { id: userId } });
   }
 
+  async updateFcmToken(userId: string, token: string): Promise<void> {
+    await this.userRepository.update(userId, { fcm_token: token });
+    this.logger.log(`Updated FCM token for user ${userId}`);
+  }
+
   /**
    * Soft-delete + schedule deferred purge (droit à l'oubli, Loi 18-07).
    * The actual data purge happens via a scheduled job.

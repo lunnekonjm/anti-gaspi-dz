@@ -36,3 +36,9 @@ export class UpdateProfileDto {
   @IsEnum(UserRole)
   role?: UserRole;
 }
+
+export class UpdateFcmTokenDto {
+  @ApiProperty({ description: 'FCM push token for the device' })
+  @IsString()
+  fcm_token: string;
+}

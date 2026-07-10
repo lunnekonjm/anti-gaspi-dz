@@ -6,8 +6,10 @@ import { LocationPrivacyService } from './location-privacy.service';
 import { AuditRetentionService } from '../common/services/audit-retention.service';
 import { Offer, AuditLog } from '../database/entities';
 
+import { NotificationsModule } from '../notifications/notifications.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Offer, AuditLog])],
+  imports: [TypeOrmModule.forFeature([Offer, AuditLog]), NotificationsModule],
   controllers: [OffersController],
   providers: [OffersService, LocationPrivacyService, AuditRetentionService],
   exports: [OffersService],

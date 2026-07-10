@@ -6,6 +6,8 @@ import { Offer } from '../database/entities';
 import { ExpiryType, OfferStatus } from '../common/enums';
 import { CreateOfferDto } from './dto';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 @Injectable()
 export class OffersService {
   private readonly logger = new Logger(OffersService.name);
@@ -13,6 +15,7 @@ export class OffersService {
   constructor(
     @InjectRepository(Offer)
     private readonly offerRepository: Repository<Offer>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -54,7 +57,17 @@ export class OffersService {
       status: OfferStatus.ACTIVE,
     });
 
-    return this.offerRepository.save(offer);
+    const savedOffer = await this.offerRepository.save(offer);
+
+    // Notify all users subscribed to 'new_offers' topic
+    await this.notificationsService.sendToTopic(
+      'new_offers',
+      'Nouvelle Offre Anti-Gaspi',
+      `Un nouveau panier surprise est disponible : ${savedOffer.title}`,
+      { offerId: savedOffer.id }
+    );
+
+    return savedOffer;
   }
 
   /**

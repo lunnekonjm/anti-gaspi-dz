@@ -14,6 +14,7 @@ import type { Cache } from 'cache-manager';
 import { Reservation, Offer } from '../database/entities';
 import { ReservationStatus, OfferStatus } from '../common/enums';
 import { CreateReservationDto } from './dto';
+import { NotificationsService } from '../notifications/notifications.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -28,6 +29,7 @@ export class ReservationsService {
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -132,6 +134,7 @@ export class ReservationsService {
   ): Promise<Reservation> {
     const reservation = await this.reservationRepository.findOne({
       where: { id: reservationId },
+      relations: ['consumer', 'offer', 'offer.merchant'],
     });
 
     if (!reservation) {
@@ -160,7 +163,29 @@ export class ReservationsService {
     reservation.qr_code_token = qrToken;
     reservation.confirmed_at = new Date();
 
-    return this.reservationRepository.save(reservation);
+    const savedReservation = await this.reservationRepository.save(reservation);
+
+    // Notify consumer (if they consented and have a token)
+    if (reservation.consumer?.fcm_token && reservation.consumer?.consent_notifications) {
+      await this.notificationsService.sendPushNotification(
+        reservation.consumer.fcm_token,
+        'Réservation Confirmée',
+        `Votre réservation pour "${reservation.offer?.title}" est confirmée.`,
+        { reservationId: savedReservation.id }
+      );
+    }
+
+    // Notify merchant (if they consented and have a token)
+    if (reservation.offer?.merchant?.fcm_token && reservation.offer?.merchant?.consent_notifications) {
+      await this.notificationsService.sendPushNotification(
+        reservation.offer.merchant.fcm_token,
+        'Nouvelle Réservation',
+        `Une nouvelle réservation a été effectuée pour "${reservation.offer?.title}".`,
+        { reservationId: savedReservation.id, offerId: reservation.offer.id }
+      );
+    }
+
+    return savedReservation;
   }
 
   /**
