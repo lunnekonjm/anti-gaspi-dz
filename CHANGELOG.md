@@ -44,3 +44,13 @@ The following secrets were previously committed to git history and **must be tre
 - **P3-06**: Audit log IP retention — 90-day retention policy, nullified via scheduled job daily at 5 AM
 - **P3-01 / P3-07**: Privacy policy + Terms of Service created in `docs/cgu/` (bilingual FR/AR), documenting all data flows including third-party services
 - **S2-14**: OTP codes hashed with SHA-256 before storage — plaintext no longer persisted in database
+
+### Phase 3: UX/UI & Localization
+
+- **U4-01**: Hardcoded French strings removed from UI (`offers_list_page.dart`, `reservation_status_page.dart`, `profile_page.dart`) and replaced with localization keys in `app_fr.arb` and `app_ar.arb`.
+- **U4-02**: Explicit `Directionality` wrapper removed from `main.dart` — `MaterialApp` inherently handles RTL/LTR based on locale and delegates.
+- **U4-03**: Offline/connectivity handling added — 60-second timeouts applied to all API calls to account for Render cold starts; `SocketException` and `TimeoutException` now return localized `ApiExceptions`.
+- **U4-04**: Accessibility improved — decorative emojis wrapped in `ExcludeSemantics` to prevent screen readers from announcing Unicode names; localized tooltip added to map button.
+- **U4-06**: Dark mode enabled via `darkTheme` and `themeMode: ThemeMode.system` in `MaterialApp`.
+- **U4-07**: Offer product images now rendered using `CachedNetworkImage` with loading and error fallbacks instead of text-only display.
+- **U4-08**: Error states improved — `OffersListPage` now renders an `_ErrorState` widget with localized API errors and a 'Retry' button instead of swallowing or stringifying errors.
