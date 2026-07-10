@@ -54,9 +54,11 @@ export class MockPaymentProvider {
 
   verifyWebhookSignature(
     _payload: Record<string, any>,
-    _signature: string,
+    signature: string,
   ): boolean {
-    // Mock always returns true
-    return true;
+    if (process.env.NODE_ENV === 'production') {
+      return false; // Mock webhooks disabled in production
+    }
+    return signature === 'mock-signature-123';
   }
 }

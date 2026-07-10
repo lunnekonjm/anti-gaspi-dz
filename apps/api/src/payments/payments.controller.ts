@@ -57,6 +57,10 @@ export class PaymentsController {
     @Query('ref') ref: string,
     @Query('reservation') reservationId: string,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      const { ForbiddenException } = require('@nestjs/common');
+      throw new ForbiddenException('Mock payments are disabled in production');
+    }
     return this.paymentsService.simulateMockPayment(ref, reservationId);
   }
 }
