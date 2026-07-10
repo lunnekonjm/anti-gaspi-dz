@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// dotenv removed — A1-08
 import '../providers/dev_provider.dart';
 
 class DevDashboardPage extends StatefulWidget {

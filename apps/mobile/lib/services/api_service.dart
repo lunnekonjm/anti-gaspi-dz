@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Centralized API service for all backend communication.
 /// Handles JWT auth, bilingual errors, and base URL configuration.
+/// Closes A1-08: Use --dart-define=API_URL=... instead of bundled .env
 class ApiService {
-  String get _baseUrl => 'https://anti-gaspi-api.onrender.com/api/v1';
+  // Read from --dart-define at build time, with dev fallback
+  static const String _defaultUrl = 'https://anti-gaspi-api.onrender.com/api/v1';
+  String get _baseUrl => const String.fromEnvironment('API_URL', defaultValue: _defaultUrl);
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> get _token => _storage.read(key: 'jwt_token');

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// Closes A1-08: dotenv removed — use --dart-define for build-time config
 
 import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
@@ -18,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('settings_box');
-  await dotenv.load(fileName: ".env");
+  // Closes A1-08: .env no longer bundled — API_URL set via --dart-define
   runApp(const AntiGaspiApp());
 }
 
