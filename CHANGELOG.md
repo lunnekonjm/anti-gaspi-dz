@@ -34,3 +34,13 @@ The following secrets were previously committed to git history and **must be tre
 - **A1-09**: Pagination added to `findActive()` and `findByNeighborhood()` — default page size 20, hard max 100, response shape `{ data, total, page, limit }`
 - **A1-08**: Mobile `.env` removed from Flutter asset bundle; API URL now via `--dart-define=API_URL=...`; `flutter_dotenv` import/usage removed
 - **A1-13**: Debug test artifacts (`test.jpg`, `test.txt`, `test.webp`, `files/`) excluded via `.gitignore`
+
+### Phase 2: Privacy & Compliance
+
+- **P3-04**: Phone numbers redacted from association listing — only `id` and `display_name` returned
+- **P3-02**: Data purge scheduled job — anonymizes soft-deleted users after 30-day grace period (daily at 3 AM)
+- **P3-03**: `ConsentGuard` created and applied — payment initiation now requires `consent_payment`
+- **P3-05**: Geolocation precision reduced for expired offers — 7 decimal places → 2 (~1.1km) daily at 4 AM
+- **P3-06**: Audit log IP retention — 90-day retention policy, nullified via scheduled job daily at 5 AM
+- **P3-01 / P3-07**: Privacy policy + Terms of Service created in `docs/cgu/` (bilingual FR/AR), documenting all data flows including third-party services
+- **S2-14**: OTP codes hashed with SHA-256 before storage — plaintext no longer persisted in database
