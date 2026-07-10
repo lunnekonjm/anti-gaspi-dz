@@ -321,13 +321,31 @@ export class ReservationsService {
     }
   }
 
-  // --- Redis lock helpers ---
+  // --- Redis lock helpers (Closes A1-04: atomic SET NX PX) ---
+
+  /**
+   * Acquire lock atomically using Redis SET NX PX.
+   * Falls back gracefully to PostgreSQL FOR UPDATE if Redis is unavailable.
+   */
   private async acquireLock(
     key: string,
     value: string,
     ttlSeconds: number,
   ): Promise<boolean> {
     try {
+      const store = (this.cacheManager as any).store;
+      // cache-manager-redis-yet exposes the underlying redis client
+      const client = store?.client;
+      if (client && typeof client.set === 'function') {
+        // Atomic SET NX PX — only sets if key doesn't exist
+        const result = await client.set(key, value, {
+          NX: true,
+          PX: ttlSeconds * 1000,
+        });
+        return result === 'OK';
+      }
+      // Fallback for non-Redis cache (in-memory): use cache-manager API
+      // This is inherently non-atomic but acceptable for in-memory single-process
       const existing = await this.cacheManager.get(key);
       if (existing) return false;
       await this.cacheManager.set(key, value, ttlSeconds * 1000);
@@ -340,8 +358,27 @@ export class ReservationsService {
     }
   }
 
+  /**
+   * Release lock atomically — only deletes if the value matches (owner check).
+   * Uses a Lua script for atomicity, or falls back to GET+DEL for non-Redis stores.
+   */
   private async releaseLock(key: string, value: string): Promise<void> {
     try {
+      const store = (this.cacheManager as any).store;
+      const client = store?.client;
+      if (client && typeof client.eval === 'function') {
+        // Atomic Lua script: check value then delete in one round-trip
+        const luaScript = `
+          if redis.call("get", KEYS[1]) == ARGV[1] then
+            return redis.call("del", KEYS[1])
+          else
+            return 0
+          end
+        `;
+        await client.eval(luaScript, { keys: [key], arguments: [value] });
+        return;
+      }
+      // Fallback for non-Redis cache
       const existing = await this.cacheManager.get(key);
       if (existing === value) {
         await this.cacheManager.del(key);
