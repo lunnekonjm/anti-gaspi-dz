@@ -134,7 +134,9 @@ import {
     DonationsModule,
     InstitutionalDonationsModule,
     SponsorshipModule,
-    DevModule,
+    // DevModule only loaded in non-production — routes don't exist at all in prod (404)
+    // Closes S2-01 / A1-11
+    ...(process.env.NODE_ENV !== 'production' ? [DevModule] : []),
   ],
 })
 export class AppModule {}
