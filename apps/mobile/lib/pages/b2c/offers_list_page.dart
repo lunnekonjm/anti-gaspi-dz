@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -144,6 +145,21 @@ class _OfferCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (offer['photo_url'] != null && offer['photo_url'].isNotEmpty)
+            CachedNetworkImage(
+              imageUrl: offer['photo_url'],
+              height: 150,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) => const SizedBox(
+                height: 150,
+                child: Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 48)),
+              ),
+              placeholder: (context, url) => Container(
+                height: 150,
+                color: Colors.grey.shade200,
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
           // Header with price badge
           Container(
             padding: const EdgeInsets.all(16),
