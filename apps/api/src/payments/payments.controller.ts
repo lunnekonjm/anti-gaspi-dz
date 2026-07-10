@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { InitiatePaymentDto, PaymentWebhookDto } from './dto';
 import { AuditLogInterceptor } from '../common/interceptors';
+import { ConsentGuard, RequireConsent } from '../common/guards';
 
 @ApiTags('Payments / المدفوعات')
 @Controller('api/v1/payments')
@@ -21,7 +22,9 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('initiate')
-  @UseGuards(AuthGuard('jwt'))
+  // Closes P3-03: Require payment consent before initiating payment
+  @UseGuards(AuthGuard('jwt'), ConsentGuard)
+  @RequireConsent('consent_payment')
   @UseInterceptors(AuditLogInterceptor)
   @ApiBearerAuth()
   @ApiOperation({
