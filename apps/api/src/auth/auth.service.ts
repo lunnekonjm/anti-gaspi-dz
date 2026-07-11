@@ -134,10 +134,20 @@ export class AuthService {
     }
 
     // Find or create user
-    let user = await this.userRepository.findOne({
-      where: { phone_number: phoneNumber },
-    });
+    let user: User | null;
     let isNewUser = false;
+    try {
+      user = await this.userRepository.findOne({
+        where: { phone_number: phoneNumber },
+      });
+      this.logger.log(`findOne result for ${phoneNumber}: ${user ? 'found user ' + user.id : 'no user found'}`);
+    } catch (dbError: any) {
+      this.logger.error(`DATABASE ERROR on findOne: ${dbError.message}`, dbError.stack);
+      throw new HttpException(
+        { message_fr: `Erreur DB: ${dbError.message}`, message_ar: dbError.message, error: 'Database Error' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
     const isTestMerchant = phoneNumber === '+213550000000';
     const isTestConsumer = phoneNumber === '+213555123456';
