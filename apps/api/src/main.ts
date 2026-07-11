@@ -23,7 +23,7 @@ async function bootstrap() {
   app.useGlobalFilters(new BilingualExceptionFilter());
 
   // CORS — Closes A1-07 / S2-10: explicit origin allow-list instead of wildcard
-  const allowedOrigins = (configService.get<string>('CORS_ORIGINS') || 'http://localhost:3000,http://localhost:8080')
+  const allowedOrigins = (configService.get<string>('CORS_ORIGINS') || 'http://localhost:3000,http://localhost:8080,https://anti-gaspi-dz.web.app')
     .split(',')
     .map((o: string) => o.trim());
   app.enableCors({
