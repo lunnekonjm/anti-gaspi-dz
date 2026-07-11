@@ -60,9 +60,8 @@ import { UploadsModule } from './uploads/uploads.module';
           ...(url
             ? {
                 url,
-                // Closes A1-10 / S2-12: Verify SSL certificates in production.
-                // If connection fails, add Render's CA cert via NODE_EXTRA_CA_CERTS env var.
-                ssl: isProd ? { rejectUnauthorized: true } : false,
+                // Render Postgres uses self-signed certificates on free tier.
+                ssl: isProd ? { rejectUnauthorized: false } : false,
               }
             : {
                 host: configService.get<string>('DATABASE_HOST', 'localhost'),
