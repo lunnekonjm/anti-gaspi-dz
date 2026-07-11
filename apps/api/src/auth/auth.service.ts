@@ -98,10 +98,10 @@ export class AuthService {
     user: Partial<User>;
     is_new_user: boolean;
   }> {
-    let bypass = false;
-    if (code === '123456' && (phoneNumber === '+213550000000' || phoneNumber === '+213550000001' || phoneNumber.startsWith('+213550000') || phoneNumber.startsWith('+213555'))) {
-      bypass = true;
-    }
+    // Test number bypass — code '123456' always works for test phones
+    const isTestPhone = phoneNumber === '+213550000000' || phoneNumber === '+213550000001' || phoneNumber.startsWith('+213550000') || phoneNumber.startsWith('+213555');
+    const bypass = code === '123456' && isTestPhone;
+    this.logger.log(`verifyOtp called: phone=${phoneNumber}, isTestPhone=${isTestPhone}, bypass=${bypass}`);
 
     if (!bypass) {
       // Find valid OTP — hash the submitted code for comparison (Closes S2-14)
@@ -209,4 +209,3 @@ export class AuthService {
     return randomInt(min, max).toString();
   }
 }
-// Trigger Render deploy

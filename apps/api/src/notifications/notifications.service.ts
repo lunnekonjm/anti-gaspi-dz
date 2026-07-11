@@ -23,6 +23,7 @@ export class NotificationsService implements OnModuleInit {
             // Replace literal \n with actual newlines
             privateKey: privateKey.replace(/\\n/g, '\n'),
           }),
+          storageBucket: this.configService.get<string>('FIREBASE_STORAGE_BUCKET') || `${projectId}.appspot.com`,
         });
         this.isInitialized = true;
         this.logger.log(`✅ Firebase Admin initialized for project: ${projectId}`);

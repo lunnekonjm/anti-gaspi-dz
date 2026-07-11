@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../../providers/offers_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/info_tooltip.dart';
 import '../../widgets/success_burst.dart';
@@ -228,7 +229,7 @@ class _CreateOfferPageState extends State<CreateOfferPage> {
                     expiryDate: _expiryDate!,
                     expiryType: _expiryType,
                     imageFile: _imageFile,
-                    error: offers.error,
+                    error: offers.error?.messageFr,
                     l10n: l10n,
                   ),
               },

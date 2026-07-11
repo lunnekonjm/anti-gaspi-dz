@@ -224,4 +224,44 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get logout => 'Déconnexion';
+
+  @override
+  String get howItWorksTitle => 'Comment ça marche ?';
+
+  @override
+  String get howItWorksBody =>
+      'Réservez un panier surprise à prix réduit, payez en ligne, et récupérez-le pendant le créneau indiqué avec votre QR code.';
+
+  @override
+  String get comeBackLater =>
+      'Revenez un peu plus tard — de nouveaux paniers arrivent régulièrement 🌱';
+
+  @override
+  String get dlcVsDdmTitle => 'DLC vs DDM';
+
+  @override
+  String get dlcVsDdmBody =>
+      'DLC (Date Limite de Consommation) : à consommer avant cette date, pour raisons de sécurité alimentaire.\n\nDDM (Date de Durabilité Minimale) : indicative — le produit reste bon au-delà, avec une qualité qui peut légèrement diminuer.';
+
+  @override
+  String get paymentWaitingMessage =>
+      'Une fois le paiement confirmé, votre QR code de retrait apparaîtra ici.';
+
+  @override
+  String get devModeTitle => 'Mode Développeur / Admin';
+
+  @override
+  String get devModeSubtitle => 'Afficher les indicateurs Mock';
+
+  @override
+  String get openAdminDashboard => 'Ouvrir le Dashboard Admin';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get mapTooltip => 'Voir sur la carte';
+
+  @override
+  String get retry => 'Réessayer';
 }

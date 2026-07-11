@@ -222,4 +222,43 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get logout => 'تسجيل الخروج';
+
+  @override
+  String get howItWorksTitle => 'كيف تعمل؟';
+
+  @override
+  String get howItWorksBody =>
+      'احجز كيسًا مفاجئًا بسعر مخفض، ادفع عبر الإنترنت، واستلمه خلال الوقت المحدد باستخدام رمز الاستجابة السريعة (QR) الخاص بك.';
+
+  @override
+  String get comeBackLater => 'عد لاحقًا — تصل عروض جديدة بانتظام 🌱';
+
+  @override
+  String get dlcVsDdmTitle => 'DLC مقابل DDM';
+
+  @override
+  String get dlcVsDdmBody =>
+      'DLC (تاريخ انتهاء الاستهلاك): يجب استهلاكه قبل هذا التاريخ، لأسباب تتعلق بسلامة الأغذية.\n\nDDM (تاريخ الصلاحية المفضل): إرشادي — يبقى المنتج جيدًا بعده، مع احتمال انخفاض الجودة قليلاً.';
+
+  @override
+  String get paymentWaitingMessage =>
+      'بمجرد تأكيد الدفع، سيظهر رمز الاستجابة السريعة الخاص بك هنا.';
+
+  @override
+  String get devModeTitle => 'وضع المطور / المسؤول';
+
+  @override
+  String get devModeSubtitle => 'عرض مؤشرات وهمية';
+
+  @override
+  String get openAdminDashboard => 'فتح لوحة تحكم المسؤول';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get mapTooltip => 'عرض على الخريطة';
+
+  @override
+  String get retry => 'إعادة المحاولة';
 }

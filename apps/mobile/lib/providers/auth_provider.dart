@@ -15,6 +15,7 @@ class AuthProvider extends ChangeNotifier {
   String _selectedLanguage = 'fr';
   Map<String, dynamic>? _user;
   String? _errorMessage;
+  String? _token;
 
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _isAuthenticated;
@@ -23,6 +24,7 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? get user => _user;
   String? get errorMessage => _errorMessage;
   String get userRole => _user?['role'] ?? 'consumer';
+  String? get token => _token;
 
   AuthProvider() {
     _loadSession();
@@ -30,6 +32,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _loadSession() async {
     final token = await _storage.read(key: 'jwt_token');
+    _token = token;
     final lang = await _storage.read(key: 'language') ?? 'fr';
     _selectedLanguage = lang;
     if (token != null) {
@@ -92,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final data = await _api.verifyOtp(phoneNumber, code);
       final token = data['access_token'];
+      _token = token;
       _isNewUser = data['is_new_user'] ?? false;
       
       await _storage.write(key: 'jwt_token', value: token);
@@ -136,6 +140,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _api.logout();
+    _token = null;
     _isAuthenticated = false;
     _user = null;
     notifyListeners();
@@ -144,6 +149,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> deleteAccount() async {
     await _api.deleteAccount();
     await _api.logout();
+    _token = null;
     _isAuthenticated = false;
     _user = null;
     notifyListeners();

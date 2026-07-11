@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "529559879315",
+    "project_id": "anti-gaspi-dz",
+    "storage_bucket": "anti-gaspi-dz.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529559879315:android:9cc30a8a6dfa83f2349766",
+        "android_client_info": {
+          "package_name": "com.antigaspi.anti_gaspi_dz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQuRIZW0Yp5y2MDieQRyox1Dm7QBbaZ4I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

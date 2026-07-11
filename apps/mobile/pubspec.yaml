@@ -28,6 +28,8 @@ dependencies:
   url_launcher: ^6.3.2
   google_fonts: ^8.1.0
   image_picker: ^1.2.3
+  firebase_core: ^4.11.0
+  firebase_messaging: ^16.4.1
 
 dev_dependencies:
   flutter_test:
@@ -42,3 +44,6 @@ flutter:
     # Closes A1-08: .env removed from assets. Use --dart-define=API_URL=... at build time.
     - assets/
     - assets/images/
+
+dependency_overrides:
+  objective_c: 9.1.0

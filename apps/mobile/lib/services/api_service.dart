@@ -199,6 +199,25 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> _put(
+    String path,
+    Map<String, dynamic> body, {
+    bool auth = true,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl$path'),
+        headers: await _headers(auth: auth),
+        body: json.encode(body),
+      ).timeout(const Duration(seconds: 60));
+      return _handleResponse(response);
+    } on SocketException {
+      throw _offlineError();
+    } on TimeoutException {
+      throw _timeoutError();
+    }
+  }
+
   Future<void> _delete(String path) async {
     try {
       final response = await http.delete(

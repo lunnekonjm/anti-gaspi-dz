@@ -3,12 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:anti_gaspi_dz/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/info_tooltip.dart';
+import '../../widgets/success_burst.dart';
 
 class CreateInstitutionalDonationPage extends StatefulWidget {
   const CreateInstitutionalDonationPage({super.key});
 
   @override
-  State<CreateInstitutionalDonationPage> createState() => _CreateInstitutionalDonationPageState();
+  State<CreateInstitutionalDonationPage> createState() =>
+      _CreateInstitutionalDonationPageState();
 }
 
 class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDonationPage> {
@@ -16,7 +19,7 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
   final _descController = TextEditingController();
   final _quantityController = TextEditingController();
   final ApiService _api = ApiService();
-  
+
   bool _isLoading = false;
   String? _error;
 
@@ -29,7 +32,7 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -41,13 +44,8 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
         'estimated_quantity': _quantityController.text,
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Excédent signalé avec succès !'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, true);
+        await showSuccessBurst(context, message: '🌍 Excédent signalé avec succès !');
+        if (mounted) Navigator.pop(context, true);
       }
     } on ApiException catch (e) {
       setState(() => _error = e.messageFr);
@@ -63,30 +61,38 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.announceSurplus)),
+      appBar: AppBar(title: Text('🌍  ${l10n.announceSurplus}')),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            // Info banner
+            // Process explainer — replaces the plain info banner with a
+            // step-by-step so the professional knows what happens next.
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.shade200),
+                gradient: LinearGradient(colors: [Colors.blue.shade50, Colors.teal.shade50]),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.blue.shade100),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Signalez votre surplus alimentaire. Une association pourra le récupérer avec un acte de transfert de responsabilité sanitaire.',
-                      style: TextStyle(color: Colors.blue.shade700, fontSize: 13),
-                    ),
+                  Row(
+                    children: [
+                      const Text('📋', style: TextStyle(fontSize: 22)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Ce qui va se passer',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade800),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 10),
+                  const _MiniStep(emoji: '1️⃣', text: 'Une association proche accepte votre don'),
+                  const _MiniStep(emoji: '2️⃣', text: 'Un acte de transfert PDF est généré automatiquement'),
+                  const _MiniStep(emoji: '3️⃣', text: 'L\'association signe électroniquement — vous êtes couvert'),
                 ],
               ),
             ),
@@ -97,21 +103,56 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
                 labelText: 'Description de l\'excédent',
                 hintText: 'Ex: 50 baguettes invendues, DLC demain...',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.description),
+                prefixIcon: const Icon(Icons.description_outlined),
               ),
               maxLines: 4,
               validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _quantityController,
-              decoration: InputDecoration(
-                labelText: l10n.quantity,
-                hintText: 'Ex: 50 pièces (~15 kg)',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.scale),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _quantityController,
+                    decoration: InputDecoration(
+                      labelText: l10n.quantity,
+                      hintText: 'Ex: 50 pièces (~15 kg)',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.scale_outlined),
+                    ),
+                    validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
+                  ),
+                ),
+                const InfoTooltip(
+                  title: 'Pourquoi indiquer la quantité ?',
+                  body: 'Elle aide l\'association à évaluer si elle peut transporter et '
+                      'stocker le don, et permet de calculer votre impact RSE (repas '
+                      'sauvés, CO₂ évité) dans votre tableau de bord.',
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade200),
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
+              child: Row(
+                children: [
+                  Icon(Icons.verified_user_outlined, color: Colors.amber.shade800, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'L\'acte de transfert vous décharge de toute responsabilité sanitaire '
+                      'une fois signé par l\'association.',
+                      style: TextStyle(color: Colors.amber.shade900, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
             ),
             if (_error != null) ...[
               const SizedBox(height: 16),
@@ -141,6 +182,30 @@ class _CreateInstitutionalDonationPageState extends State<CreateInstitutionalDon
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MiniStep extends StatelessWidget {
+  final String emoji;
+  final String text;
+
+  const _MiniStep({required this.emoji, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: TextStyle(fontSize: 13, color: Colors.blue.shade900)),
+          ),
+        ],
       ),
     );
   }

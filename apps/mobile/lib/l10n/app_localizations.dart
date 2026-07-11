@@ -505,6 +505,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Déconnexion'**
   String get logout;
+
+  /// No description provided for @howItWorksTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment ça marche ?'**
+  String get howItWorksTitle;
+
+  /// No description provided for @howItWorksBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservez un panier surprise à prix réduit, payez en ligne, et récupérez-le pendant le créneau indiqué avec votre QR code.'**
+  String get howItWorksBody;
+
+  /// No description provided for @comeBackLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenez un peu plus tard — de nouveaux paniers arrivent régulièrement 🌱'**
+  String get comeBackLater;
+
+  /// No description provided for @dlcVsDdmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'DLC vs DDM'**
+  String get dlcVsDdmTitle;
+
+  /// No description provided for @dlcVsDdmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'DLC (Date Limite de Consommation) : à consommer avant cette date, pour raisons de sécurité alimentaire.\n\nDDM (Date de Durabilité Minimale) : indicative — le produit reste bon au-delà, avec une qualité qui peut légèrement diminuer.'**
+  String get dlcVsDdmBody;
+
+  /// No description provided for @paymentWaitingMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une fois le paiement confirmé, votre QR code de retrait apparaîtra ici.'**
+  String get paymentWaitingMessage;
+
+  /// No description provided for @devModeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode Développeur / Admin'**
+  String get devModeTitle;
+
+  /// No description provided for @devModeSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les indicateurs Mock'**
+  String get devModeSubtitle;
+
+  /// No description provided for @openAdminDashboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir le Dashboard Admin'**
+  String get openAdminDashboard;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @mapTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir sur la carte'**
+  String get mapTooltip;
+
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate
