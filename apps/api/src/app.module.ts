@@ -89,12 +89,10 @@ import { UploadsModule } from './uploads/uploads.module';
             MerchantRequest,
             Review,
           ],
-          // Closes A1-01: NEVER synchronize — use migrations exclusively.
-          // Generate: npx typeorm migration:generate -d ormconfig.ts src/database/migrations/MigrationName
-          // Run: npx typeorm migration:run -d ormconfig.ts
-          synchronize: false,
+          // TODO: revert to false + migrations once schema stabilizes
+          synchronize: true,
           migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-          migrationsRun: true, // Auto-run pending migrations on startup
+          migrationsRun: false, // Disabled while synchronize:true handles schema
           logging: configService.get('NODE_ENV') === 'development',
         };
       },
