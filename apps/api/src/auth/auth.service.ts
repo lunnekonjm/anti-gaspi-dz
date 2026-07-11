@@ -143,16 +143,20 @@ export class AuthService {
     const isTestConsumer = phoneNumber === '+213555123456';
 
     if (!user) {
-      user = this.userRepository.create({
-        phone_number: phoneNumber,
-        is_verified: true,
-        role: isTestMerchant ? UserRole.MERCHANT : UserRole.CONSUMER,
-        display_name: isTestMerchant 
-          ? 'Boulangerie de Test' 
-          : (isTestConsumer ? 'Client de Test' : undefined),
-      });
-      await this.userRepository.save(user);
-      isNewUser = true;
+      try {
+        user = this.userRepository.create({
+          phone_number: phoneNumber,
+          is_verified: true,
+          role: isTestMerchant ? UserRole.MERCHANT : UserRole.CONSUMER,
+          display_name: isTestMerchant 
+            ? 'Boulangerie de Test' 
+            : (isTestConsumer ? 'Client de Test' : undefined),
+        });
+        await this.userRepository.save(user);
+        isNewUser = true;
+      } catch (error: any) {
+        throw new HttpException(`Failed to create user: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     } else {
       let needsSave = false;
       if (isTestMerchant && user.role !== UserRole.MERCHANT) {
@@ -170,7 +174,11 @@ export class AuthService {
         needsSave = true;
       }
       if (needsSave) {
-        await this.userRepository.save(user);
+        try {
+          await this.userRepository.save(user);
+        } catch (error: any) {
+          throw new HttpException(`Failed to update user: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
       }
     }
 
